@@ -1,8 +1,6 @@
-![](assets/20240219_232307_logo.png)
+![](https://github.com/giulicrenna/FastSocket/blob/main/assets/Design.png)
 
 # FastSocket
-
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/giulicrenna/FastSocket)
 
 The FastSocket library is designed to quickly create TCP and UDP servers and clients with multi-connection handling. The library provides a simple API for setting up and managing network socket connections in Python.
 
