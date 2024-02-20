@@ -1,3 +1,5 @@
 
 *.pyc
 fastsocket/tempCodeRunnerFile.py
+*.gz
+FastSocket.egg-info/
