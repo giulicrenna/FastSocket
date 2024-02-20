@@ -5,8 +5,12 @@ from queue import Queue
 import socket
 import os
 
-from _types import *
-from _expt import *
+if __name__ == '__main__':
+    from _types import *
+    from _expt import *
+else:
+    from FastSocket._types import *
+    from FastSocket._expt import *
 
 def print_log_error(log: str, instance: str) -> None:
     print(Color.RED + f'[{instance}]' + Color.END + f': {log}')
@@ -39,8 +43,8 @@ class SockerConfig:
     def __init__(self,
                  host: str = 'localhost',
                  port: int = 7654,
-                 family: Literal[Types.ADDRESS_FAMILY_IP_V4] = socket.AF_INET,
-                 type: Literal[Types.TCP_STREAM_TYPE] = socket.SOCK_STREAM,
+                 family: Types.ADDRESS_FAMILY_IP_V4 = socket.AF_INET,
+                 type: Types.TCP_STREAM_TYPE = socket.SOCK_STREAM,
                  reuse_address: bool = True) -> None:
         
         self.host = host

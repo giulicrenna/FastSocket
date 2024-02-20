@@ -19,14 +19,14 @@ pip install FastSocket
 ### TCP Server Example
 
 ```python
-from FastSocket import FastSocketServer, SockerConfig
+from FastSocket.fastsocket import FastSocketServer, SockerConfig
 
 def handle_message(messages):
     while not messages.empty():
         msg, addr = messages.get()
         print(f'Received: {msg} from {addr}')
 
-config = SockerConfig(host='localhost', port=8080)
+config = SockerConfig(host='192.168.0.104', port=8080)
 server = FastSocketServer(config)
 server.on_new_message(handle_message)
 server.start()
