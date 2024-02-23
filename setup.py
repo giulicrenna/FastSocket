@@ -2,8 +2,11 @@ from setuptools import setup, find_packages
 
 setup(
     name='FastSocket',
-    version='1.0.4',
+    version='1.0.5',
     packages=find_packages(),
+    install_requires=[
+        'pycryptodome',
+    ],
     description='This library is intended to create fast TCP and UDP server/client with multi connection handling.',
     long_description="""
     ![](https://github.com/giulicrenna/FastSocket/blob/main/assets/20240219_232307_logo.png)

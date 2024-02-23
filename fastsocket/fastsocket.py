@@ -1,44 +1,64 @@
-from typing import Literal, Type, Tuple, List, Callable
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Hash import SHA256
+from Crypto import Random
+from Crypto.Signature import PKCS1_v1_5
+
+from typing import Literal, Mapping, Type, Tuple, List, Callable
 from threading import Thread
 from queue import Queue
 
 import socket
-import os
 
 if __name__ == '__main__':
     from _types import *
     from _expt import *
+    from security import RSAEncryption
+    from logger import Logger
 else:
     from FastSocket._types import *
     from FastSocket._expt import *
-
-def print_log_error(log: str, instance: str) -> None:
-    print(Color.RED + f'[{instance}]' + Color.END + f': {log}')
-
-def print_log_normal(log: str, instance: str) -> None:
-    print(Color.GREEN + f'[{instance}]' + Color.END + f': {log}')
+    from FastSocket.security import RSAEncryption
+    from FastSocket.logger import Logger
 
 class ClientType(Thread):
     def __init__(self,
                  connection: Types.CONNECTION,
-                 address: Types.IPV4_PORT) -> None:
+                 address: Types.IPV4_PORT,
+                 recv_size: int,
+                 server_security: RSAEncryption) -> None:
         super().__init__()
         self.connection: Types.CONNECTION = connection
         self.address: Types.IPV4_PORT = address
         self.message_queue: Queue = Queue()
         self.connected: bool = True
+        self.full_reached: bool = False
+        self._recv_size = recv_size
+        self.public_key: RSA.RsaKey = None
+        self.server_security = server_security
         
     def run(self):
         while True:
             try:
-                data = self.connection.recv(1024)
-                if data:
-                    message = data.decode("utf-8")
-                    self.message_queue.put((message, self.address))
-            except:
+                if self.public_key is None:
+                    try:
+                        pub_key_bytes = self.connection.recv(self._recv_size)
+                        self.public_key = RSA.import_key(pub_key_bytes)
+                        Logger.print_log_debug(self.public_key)
+                    except:
+                        self.connection.sendall(f'Invalid Public Key'.encode('utf-8'))
+                else:
+                    data: bytes = self.connection.recv(self._recv_size)
+                    if data:
+                        message = self.server_security.decrypt(data)
+                        self.message_queue.put((message, self.address))
+                self.connected = True
+            except Exception as e:
+                Logger.print_log_error(e, 'ClientType')
                 self.connected = False
                 self.connection.close()
-        
+                break
+
 class SockerConfig:
     def __init__(self,
                  host: str = 'localhost',
@@ -63,23 +83,47 @@ class SockerConfig:
         
 class FastSocketServer(Thread):
     def __init__(self,
-                 config: SockerConfig) -> None:
+                 config: SockerConfig,
+                 pub_key_path: str,
+                 priv_key_path: str,
+                 _recv_size: int = 1024*10) -> None:
+        
         super().__init__()
         self._config = config
         self._client_buffer: List[ClientType] = []
         self._new_message_handler: List[Callable] = []
+        self._recv_size = _recv_size
+        
+        Logger.print_log_debug('Loading RSA key pair.')
+        self._security = RSAEncryption(pub_key_path, priv_key_path)
+        Logger.print_log_debug('RSA key pair loaded succesfully.')
         
     def run(self) -> None:
-        print_log_normal(f'Running server on {self._config.host}:{self._config.port}', 'Server')
+        Logger.print_log_normal(f'Running server on {self._config.host}:{self._config.port}', 'Server')
         self.sock: Types.CONNECTION = self._config._create_socket()
-        self.sock.bind((self._config.host, self._config.port))
+       
+        try:
+            self.sock.bind((self._config.host, self._config.port))
+        except OSError:
+            raise NetworkException
+        
+        task_send_pub_key = Thread(target=self._send_server_pub_key, name="_send_server_pub_key")
+        task_send_pub_key.start()
         
         task_wait_for_client = Thread(target=self._listen_for_new_clients)
         task_wait_for_client.start()
+        
         for _message_handler in self._new_message_handler:
             message_thread = Thread(target=self._run_new_message_handler, args=(_message_handler,))
             message_thread.start()
-        
+            
+    def _send_server_pub_key(self) -> None:
+        while True:
+            for client in self._client_buffer:
+                if client.public_key is not None and self._security.pub_key is not None and not client.full_reached:
+                    client.connection.sendall(self._security.pub_key.export_key())
+                    client.full_reached = True
+    
     def _listen_for_new_clients(self) -> None:
         while True:
             self.sock.settimeout(5)
@@ -92,7 +136,8 @@ class FastSocketServer(Thread):
                         
                 conn, addr = self.sock.accept()
                 
-                client_handler = ClientType(conn, addr)
+                client_handler = ClientType(conn, addr, self._recv_size, self._security)
+                client_handler.connection.sendall(f'Send public key with size: 4096 bytes\n'.encode('utf-8'))
                 client_handler.start()
                 
                 self._client_buffer.append(client_handler)
@@ -105,7 +150,7 @@ class FastSocketServer(Thread):
     def _run_new_message_handler(self, _func: Callable) -> None:
         while True:
             for client in self._client_buffer:
-                if client.connected:
+                if client.connected and not client.message_queue.empty():
                     _func(client.message_queue)
                     
     def send_msg_stream(self, message: str | bytes) -> None:
@@ -113,33 +158,63 @@ class FastSocketServer(Thread):
             raise InvalidMessageType
         for idx, client in enumerate(self._client_buffer):
             try:
-                if type(message) == bytes:
-                    client.connection.sendall(message)
-                elif type(message) == str:
-                    client.connection.sendall(message.encode())
+                if client.full_reached and client.connected:
+                    client.connection.sendall(self._security.encrypt(message, client.public_key))
             except OSError:
-                del self._client_buffer[idx]
+                pass
                 
-if __name__ == '__main__':
-    import time
-    import random
-    
-    def print_msg(messages: Queue):
-        while not messages.empty():
-            msg, addr = messages.get()
-            server.send_msg_stream(f'ECHO: {msg}, your IP is {addr}\n')
-            print(f'{msg} from {addr[0]}')
+class FastSocketClient(Thread):
+    def __init__(self,
+                 config: SockerConfig,
+                 pub_key_path: str,
+                 priv_key_path: str,
+                 _recv_size: int = 1024*10) -> None:
+        super().__init__()
+        self._config = config
+        self._new_message_handler: List[Callable] = []
+        self._recv_size = _recv_size
+        self.server_pub_key: RSA.RsaKey = None
+        
+        Logger.print_log_debug('Loading RSA key pair.')
+        self._security = RSAEncryption(pub_key_path, priv_key_path)
+        Logger.print_log_debug('RSA key pair loaded succesfully.')
+        
+    def run(self) -> None:
+        Logger.print_log_normal(f'Running server on {self._config.host}:{self._config.port}', 'Server')
+        self.sock: Types.CONNECTION = self._config._create_socket()
+        self.sock.connect((self._config.host, self._config.port))
 
-    config = SockerConfig(host='192.168.0.104',
-                          port=8080)
-    
-    server = FastSocketServer(config)
-    
-    server.on_new_message(print_msg)
-    
-    server.start()
+        ord: bytes = self.sock.recv(self._recv_size)
+        self.sock.sendall(self._security.pub_key.export_key())
+        
+        self.server_pub_key = RSA.import_key(self.sock.recv(self._recv_size))
+        
+        for _message_handler in self._new_message_handler:
+            message_thread = Thread(target=self._run_new_message_handler, args=(_message_handler,))
+            message_thread.start()
+            
+    def send_to_server(self, msg: str) -> None:
+        if self.server_pub_key is None:
+            return
+        try:
+            cipher = PKCS1_OAEP.new(self.server_pub_key)
+            message = cipher.encrypt(msg.encode('utf-8'))
 
-
-    while True:
-        server.send_msg_stream(f'{random.randint(90000,9999999999)}\n')
-        time.sleep(.3)
+            self.sock.sendall(message)
+        except Exception as e:
+            Logger.print_log_error(e, 'FastSocketClient')
+            raise e
+            
+    def on_new_message(self, func: Callable) -> None:
+        self._new_message_handler.append(func)
+        
+    def _run_new_message_handler(self, _func: Callable) -> None:
+        while True:
+            try:
+                msg = self.sock.recv(self._recv_size)
+                cipher = PKCS1_OAEP.new(self._security.priv_key)
+                decrypted_msg = cipher.decrypt(msg).decode('utf-8')
+                _func(decrypted_msg)
+            except Exception as e:
+                Logger.print_log_error(e, 'FastSocketClient')
+                raise e
