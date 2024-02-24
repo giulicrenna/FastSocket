@@ -4,6 +4,12 @@
 
 The FastSocket library is designed to quickly create TCP and UDP servers and clients with multi-connection handling. The library provides a simple API for setting up and managing network socket connections in Python.
 
+### To Do
+
+* [ ] Implement UPD connection.
+* [ ] Automatic manage data chunks.
+* [ ] File sending.
+
 ## Installation
 
 You can install FastSocket using pip:
