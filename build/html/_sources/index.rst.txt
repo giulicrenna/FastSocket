@@ -10,8 +10,14 @@ Welcome to FastSocket's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+The FastSocket library is designed to quickly create TCP and UDP servers and clients with multi-connection handling. The library provides a simple API for setting up and managing network socket connections in Python.
 
+Server Example
+~~~~~~~~~~~~~~
 
+.. literalinclude:: ../examples/echo/server.py
+   :language: python
+   
 Indices and tables
 ==================
 

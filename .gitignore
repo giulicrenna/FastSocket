@@ -1,5 +1,8 @@
 
 *.pyc
-fastsocket/tempCodeRunnerFile.py
 *.gz
-FastSocket.egg-info/
+fastsocket/tempCodeRunnerFile.py
+FastSocket.egg-info
+build
+source
+dist

@@ -34,6 +34,32 @@
 <h1>Welcome to FastSocket’s documentation!<a class="headerlink" href="#welcome-to-fastsocket-s-documentation" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
+<p>The FastSocket library is designed to quickly create TCP and UDP servers and clients with multi-connection handling. The library provides a simple API for setting up and managing network socket connections in Python.</p>
+<section id="server-example">
+<h2>Server Example<a class="headerlink" href="#server-example" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">FastSocket.FastSocket</span> <span class="kn">import</span> <span class="n">FastSocketServer</span><span class="p">,</span> <span class="n">SockerConfig</span><span class="p">,</span> <span class="n">Queue</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">PUB_KEY_PATH</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;keys&#39;</span><span class="p">,</span> <span class="s1">&#39;pub_key.pem&#39;</span><span class="p">)</span>
+<span class="n">PRIV_KEY_PATH</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;keys&#39;</span><span class="p">,</span> <span class="s1">&#39;priv_key.pem&#39;</span><span class="p">)</span> 
+
+<span class="k">def</span> <span class="nf">print_msg</span><span class="p">(</span><span class="n">messages</span><span class="p">:</span> <span class="n">Queue</span><span class="p">):</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">messages</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+        <span class="n">msg</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">messages</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">send_msg_stream</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">SockerConfig</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;192.168.0.104&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8080</span><span class="p">)</span>
+    
+    <span class="n">server</span> <span class="o">=</span> <span class="n">FastSocketServer</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">PUB_KEY_PATH</span><span class="p">,</span> <span class="n">PRIV_KEY_PATH</span><span class="p">)</span>
+    
+    <span class="n">server</span><span class="o">.</span><span class="n">on_new_message</span><span class="p">(</span><span class="n">print_msg</span><span class="p">)</span>
+    
+    <span class="n">server</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        
+</pre></div>
+</div>
+</section>
 </section>
 <section id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
