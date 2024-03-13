@@ -6,3 +6,4 @@ FastSocket.egg-info
 build
 source
 dist
+.venv.ubuntu
