@@ -21,7 +21,7 @@ else:
     from FastSocket.security import RSAEncryption
     from FastSocket.logger import Logger
 
-class ClientType(Thread):
+class SecureClientType(Thread):
     def __init__(self,
                  connection: Types.CONNECTION,
                  address: Types.IPV4_PORT,
@@ -81,7 +81,7 @@ class SockerConfig:
             
         return sock
         
-class FastSocketServer(Thread):
+class SecureFastSocketServer(Thread):
     def __init__(self,
                  config: SockerConfig,
                  pub_key_path: str,
@@ -90,7 +90,7 @@ class FastSocketServer(Thread):
         
         super().__init__()
         self._config = config
-        self._client_buffer: List[ClientType] = []
+        self._client_buffer: List[SecureClientType] = []
         self._new_message_handler: List[Callable] = []
         self._recv_size = _recv_size
         
@@ -136,7 +136,7 @@ class FastSocketServer(Thread):
                         
                 conn, addr = self.sock.accept()
                 
-                client_handler = ClientType(conn, addr, self._recv_size, self._security)
+                client_handler = SecureClientType(conn, addr, self._recv_size, self._security)
                 client_handler.connection.sendall(f'Send public key with size: 4096 bytes\n'.encode('utf-8'))
                 client_handler.start()
                 

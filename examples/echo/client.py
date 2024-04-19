@@ -1,4 +1,4 @@
-from FastSocket.FastSocket import FastSocketClient, SockerConfig
+from FastSocket.FastSocket import SecureFastSocketClient, SockerConfig
 import os
 import time
 import random
@@ -12,7 +12,7 @@ def print_msg(message: str):
 if __name__ == '__main__':
     config = SockerConfig(host='192.168.0.104', port=8080)
     
-    server = FastSocketClient(config, PUB_KEY_PATH, PRIV_KEY_PATH)
+    server = SecureFastSocketClient(config, PUB_KEY_PATH, PRIV_KEY_PATH)
     
     server.on_new_message(print_msg)
     
