@@ -21,6 +21,147 @@ else:
     from FastSocket.security import RSAEncryption
     from FastSocket.logger import Logger
 
+class SocketConfig:
+    def __init__(self,
+                 host: str = 'localhost',
+                 port: int = 7654,
+                 family: Types.ADDRESS_FAMILY_IP_V4 = socket.AF_INET,
+                 type: Types.TCP_STREAM_TYPE = socket.SOCK_STREAM,
+                 reuse_address: bool = True) -> None:
+        
+        self.host = host
+        self.port = port
+        self.family = family
+        self.type = type
+        self.reuse_address: bool = reuse_address
+        
+    def _create_socket(self) -> Types.CONNECTION:
+        sock: Types.CONNECTION = socket.socket(self.family,
+                             self.type)
+
+        if self.reuse_address: sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            
+        return sock
+        
+class ClientType(Thread):
+    def __init__(self,
+                 connection: Types.CONNECTION,
+                 address: Types.IPV4_PORT) -> None:
+        super().__init__()
+        self.connection: Types.CONNECTION = connection
+        self.address: Types.IPV4_PORT = address
+        self.message_queue: Queue = Queue()
+        self.connected: bool = True
+        
+    def run(self):
+        while True:
+            try:
+                data = self.connection.recv(1024)
+                if data:
+                    message = data.decode("utf-8")
+                    self.message_queue.put((message, self.address))
+            except:
+                self.connected = False
+                self.connection.close()
+
+class FastSocketClient(Thread):
+    def __init__(self,
+                 config: SocketConfig,
+                 _recv_size: int = 1024*10) -> None:
+        super().__init__()
+        self._config = config
+        self._new_message_handler: List[Callable] = []
+        self._recv_size = _recv_size
+        
+        self.sock: Types.CONNECTION = self._config._create_socket()
+
+    def run(self) -> None:
+        self.sock.connect((self._config.host, self._config.port))
+        
+        for _message_handler in self._new_message_handler:
+            message_thread = Thread(target=self._run_new_message_handler, args=(_message_handler,))
+            message_thread.start()
+            
+    def send_to_server(self, msg: str) -> None:
+        try:
+            message = msg.encode('utf-8')
+
+            self.sock.sendall(message)
+        except Exception as e:
+            Logger.print_log_error(e, 'FastSocketClient')
+            raise e
+            
+    def on_new_message(self, func: Callable) -> None:
+        self._new_message_handler.append(func)
+        
+    def _run_new_message_handler(self, _func: Callable) -> None:
+        while True:
+            try:
+                msg = self.sock.recv(self._recv_size)
+                _func(msg.decode('utf-8'))
+            except Exception as e:
+                Logger.print_log_error(e, 'FastSocketClient')
+                raise e
+
+class FastSocketServer(Thread):
+    def __init__(self,
+                 config: SocketConfig) -> None:
+        super().__init__()
+        self._config = config
+        self._client_buffer: List[ClientType] = []
+        self._new_message_handler: List[Callable] = []
+        
+    def run(self) -> None:
+        Logger.print_log_normal(f'Running server on {self._config.host}:{self._config.port}', 'Server')
+        self.sock: Types.CONNECTION = self._config._create_socket()
+        self.sock.bind((self._config.host, self._config.port))
+        
+        task_wait_for_client = Thread(target=self._listen_for_new_clients)
+        task_wait_for_client.start()
+        for _message_handler in self._new_message_handler:
+            message_thread = Thread(target=self._run_new_message_handler, args=(_message_handler,))
+            message_thread.start()
+        
+    def _listen_for_new_clients(self) -> None:
+        while True:
+            self.sock.settimeout(5)
+            self.sock.listen()
+        
+            try:
+                for idx, client in enumerate(self._client_buffer):
+                    if not client.connected:
+                        del self._client_buffer[idx]
+                        
+                conn, addr = self.sock.accept()
+                
+                client_handler = ClientType(conn, addr)
+                client_handler.start()
+                
+                self._client_buffer.append(client_handler)
+            except socket.timeout:
+                pass
+    
+    def on_new_message(self, func: Callable) -> None:
+        self._new_message_handler.append(func)
+        
+    def _run_new_message_handler(self, _func: Callable) -> None:
+        while True:
+            for client in self._client_buffer:
+                if client.connected:
+                    _func(client.message_queue)
+                    
+    def send_msg_stream(self, message: str | bytes) -> None:
+        if type(message) not in [str, bytes]:
+            raise InvalidMessageType
+        for idx, client in enumerate(self._client_buffer):
+            try:
+                if type(message) == bytes:
+                    client.connection.sendall(message)
+                elif type(message) == str:
+                    client.connection.sendall(message.encode())
+            except OSError:
+                del self._client_buffer[idx]
+
 class SecureClientType(Thread):
     def __init__(self,
                  connection: Types.CONNECTION,
@@ -59,31 +200,9 @@ class SecureClientType(Thread):
                 self.connection.close()
                 break
 
-class SockerConfig:
-    def __init__(self,
-                 host: str = 'localhost',
-                 port: int = 7654,
-                 family: Types.ADDRESS_FAMILY_IP_V4 = socket.AF_INET,
-                 type: Types.TCP_STREAM_TYPE = socket.SOCK_STREAM,
-                 reuse_address: bool = True) -> None:
-        
-        self.host = host
-        self.port = port
-        self.family = family
-        self.type = type
-        self.reuse_address: bool = reuse_address
-        
-    def _create_socket(self) -> Types.CONNECTION:
-        sock: Types.CONNECTION = socket.socket(self.family,
-                             self.type)
-
-        if self.reuse_address: sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            
-        return sock
-        
 class SecureFastSocketServer(Thread):
     def __init__(self,
-                 config: SockerConfig,
+                 config: SocketConfig,
                  pub_key_path: str,
                  priv_key_path: str,
                  _recv_size: int = 1024*10) -> None:
@@ -163,9 +282,9 @@ class SecureFastSocketServer(Thread):
             except OSError:
                 pass
                 
-class FastSocketClient(Thread):
+class SecureFastSocketClient(Thread):
     def __init__(self,
-                 config: SockerConfig,
+                 config: SocketConfig,
                  pub_key_path: str,
                  priv_key_path: str,
                  _recv_size: int = 1024*10) -> None:
