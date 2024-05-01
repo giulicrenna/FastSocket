@@ -7,3 +7,4 @@ build
 source
 dist
 .venv.ubuntu
+.venv

@@ -1,4 +1,4 @@
-from FastSocket.fastsocket import FastSocketServer, SockerConfig, Queue
+from FastSocket.fastsocket import FastSocketServer, SocketConfig, Queue
 import random
 import time
 
@@ -11,7 +11,7 @@ def print_msg(messages: Queue):
         else:
             server.send_msg_stream(f'\nServer -> {msg}\n')
 
-config = SockerConfig('192.168.0.105', 8080)
+config = SocketConfig('192.168.0.6', 8080)
 server = FastSocketServer(config)
 server.on_new_message(print_msg)
 
