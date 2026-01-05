@@ -8,21 +8,25 @@ import rsa
 from FastSocket.logger import Logger
 
 class RSAEncryption:
-    def __init__(self, pub_key_path: str,
-                 priv_key_path: str) -> None:
+    def __init__(self, pub_key_path: str = None,
+                 priv_key_path: str = None) -> None:
         self.pub_key_path = pub_key_path
         self.priv_key_path = priv_key_path
-        
+
         self.pub_key: RSA.RsaKey = None
         self.priv_key: RSA.RsaKey = None
-        
-        self._load_pair()
-        
+
+        if pub_key_path is not None and priv_key_path is not None:
+            self._load_pair()
+        else:
+            self._generate_pair()
+
     def _generate_pair(self) -> None:
-        Logger.print_log_debug('priv_key created succesfully')
-        self.priv_key = RSA.import_key(rsa.newkeys(self.encr_size))
+        Logger.print_log_debug('Generating new RSA key pair')
+        self.priv_key = RSA.generate(4096)
         self.pub_key = self.priv_key.publickey()
-    
+        Logger.print_log_debug('RSA key pair generated successfully')
+
     def _load_pair(self) -> None:
         with open(self.priv_key_path, 'rb') as f:
             self.priv_key = RSA.import_key(f.read())

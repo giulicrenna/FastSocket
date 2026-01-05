@@ -203,17 +203,20 @@ class SecureClientType(Thread):
 class SecureFastSocketServer(Thread):
     def __init__(self,
                  config: SocketConfig,
-                 pub_key_path: str,
-                 priv_key_path: str,
+                 pub_key_path: str = None,
+                 priv_key_path: str = None,
                  _recv_size: int = 1024*10) -> None:
-        
+
         super().__init__()
         self._config = config
         self._client_buffer: List[SecureClientType] = []
         self._new_message_handler: List[Callable] = []
         self._recv_size = _recv_size
-        
-        Logger.print_log_debug('Loading RSA key pair.')
+
+        if pub_key_path is not None and priv_key_path is not None:
+            Logger.print_log_debug('Loading RSA key pair.')
+        else:
+            Logger.print_log_debug('No key paths provided. Generating new RSA key pair.')
         self._security = RSAEncryption(pub_key_path, priv_key_path)
         Logger.print_log_debug('RSA key pair loaded succesfully.')
         
@@ -285,16 +288,19 @@ class SecureFastSocketServer(Thread):
 class SecureFastSocketClient(Thread):
     def __init__(self,
                  config: SocketConfig,
-                 pub_key_path: str,
-                 priv_key_path: str,
+                 pub_key_path: str = None,
+                 priv_key_path: str = None,
                  _recv_size: int = 1024*10) -> None:
         super().__init__()
         self._config = config
         self._new_message_handler: List[Callable] = []
         self._recv_size = _recv_size
         self.server_pub_key: RSA.RsaKey = None
-        
-        Logger.print_log_debug('Loading RSA key pair.')
+
+        if pub_key_path is not None and priv_key_path is not None:
+            Logger.print_log_debug('Loading RSA key pair.')
+        else:
+            Logger.print_log_debug('No key paths provided. Generating new RSA key pair.')
         self._security = RSAEncryption(pub_key_path, priv_key_path)
         Logger.print_log_debug('RSA key pair loaded succesfully.')
         

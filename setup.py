@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='FastSocket',
-    version='1.0.5',
+    version='2.0.0',
     packages=find_packages(),
     install_requires=[
         'pycryptodome',
@@ -30,14 +30,14 @@ pip install FastSocket
 ### TCP Server Example
 
 ```python
-from FastSocket import FastSocketServer, SockerConfig
+from FastSocket import FastSocketServer, SocketConfig
 
 def handle_message(messages):
     while not messages.empty():
         msg, addr = messages.get()
         print(f'Received: {msg} from {addr}')
 
-config = SockerConfig(host='localhost', port=8080)
+config = SocketConfig(host='localhost', port=8080)
 server = FastSocketServer(config)
 server.on_new_message(handle_message)
 server.start()
