@@ -28,10 +28,12 @@ from FastSocket.core.config import SocketConfig, SockerConfig
 # Server exports
 from FastSocket.server.tcp_server import FastSocketServer
 from FastSocket.server.secure_server import SecureFastSocketServer
+from FastSocket.server.udp_server import FastSocketUDPServer
 
 # Client exports
 from FastSocket.client.tcp_client import FastSocketClient
 from FastSocket.client.secure_client import SecureFastSocketClient
+from FastSocket.client.udp_client import FastSocketUDPClient
 
 # Security exports
 from FastSocket.security.rsa_encryption import RSAEncryption
@@ -40,10 +42,18 @@ from FastSocket.security.rsa_encryption import RSAEncryption
 from FastSocket.utils.logger import Logger, Color
 from FastSocket.utils.types import Types
 from FastSocket.utils.exceptions import (
+    FastSocketException,
     InvalidMessageType,
     NetworkException,
     BadEncryptionInput,
+    ConnectionClosedException,
+    FileTransferException,
+    IntegrityException,
+    ChunkException,
+    TimeoutException,
 )
+from FastSocket.utils.chunks import ChunkManager
+from FastSocket.utils.file_transfer import FileTransfer
 
 # For compatibility with Queue usage in examples
 from queue import Queue
@@ -61,10 +71,12 @@ __all__ = [
     # Servers
     'FastSocketServer',
     'SecureFastSocketServer',
+    'FastSocketUDPServer',
 
     # Clients
     'FastSocketClient',
     'SecureFastSocketClient',
+    'FastSocketUDPClient',
 
     # Security
     'RSAEncryption',
@@ -74,9 +86,17 @@ __all__ = [
     'Color',
     'Types',
     'Queue',
+    'ChunkManager',
+    'FileTransfer',
 
     # Exceptions
+    'FastSocketException',
     'InvalidMessageType',
     'NetworkException',
     'BadEncryptionInput',
+    'ConnectionClosedException',
+    'FileTransferException',
+    'IntegrityException',
+    'ChunkException',
+    'TimeoutException',
 ]
