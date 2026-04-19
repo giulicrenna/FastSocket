@@ -1,73 +1,38 @@
 from setuptools import setup, find_packages
 
+with open("README.md", encoding="utf-8") as f:
+    long_description = f.read()
+
 setup(
     name='FastSocket',
     version='2.0.0',
     packages=find_packages(),
+    python_requires='>=3.8',
     install_requires=[
-        'pycryptodome',
+        'pycryptodome>=3.18.0',
     ],
-    description='This library is intended to create fast TCP and UDP server/client with multi connection handling.',
-    long_description="""
-    ![](https://github.com/giulicrenna/FastSocket/blob/main/assets/20240219_232307_logo.png)
-
-# FastSocket
-
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/giulicrenna/FastSocket)
-
-The FastSocket library is designed to quickly create TCP and UDP servers and clients with multi-connection handling. The library provides a simple API for setting up and managing network socket connections in Python.
-
-## Installation
-
-You can install FastSocket using pip:
-
-```bash
-pip install FastSocket
-```
-
-## Usage Examples
-
-### TCP Server Example
-
-```python
-from FastSocket import FastSocketServer, SocketConfig
-
-def handle_message(messages):
-    while not messages.empty():
-        msg, addr = messages.get()
-        print(f'Received: {msg} from {addr}')
-
-config = SocketConfig(host='localhost', port=8080)
-server = FastSocketServer(config)
-server.on_new_message(handle_message)
-server.start()
-
-```
-
-## Contributing
-
-If you want to contribute to FastSocket, we welcome pull requests! Before submitting a pull request, please make sure to review the contribution guidelines.
-
-# Contact
-
-If you have any questions, issues, or suggestions related to FastSocket, feel free to open an issue or contact the author:
-
-*Author:* Giuliano Crenna
-*Email:* giulicrenna@gmail.com
-
-## License
-
-This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0). See the LICENSE file for more details.
-
-    """,
+    description='Librería Python para servidores y clientes TCP/UDP con cifrado híbrido, chunks y transferencia de archivos.',
+    long_description=long_description,
     long_description_content_type='text/markdown',
-    author="Giuliano Crenna",
-    author_email="giulicrenna@gmail.com",
-    url="https://github.com/giulicrenna/FastSocket",
+    author='Giuliano Crenna',
+    author_email='giulicrenna@gmail.com',
+    url='https://github.com/giulicrenna/FastSocket',
+    project_urls={
+        'Documentación': 'https://giulicrenna.github.io/FastSocket/',
+        'Issues': 'https://github.com/giulicrenna/FastSocket/issues',
+    },
     classifiers=[
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
         'Operating System :: OS Independent',
-        'Topic :: Software Development :: Libraries'
+        'Topic :: Software Development :: Libraries',
+        'Topic :: Internet',
+        'Topic :: System :: Networking',
     ],
+    keywords='tcp udp socket server client encryption hybrid rsa aes',
 )

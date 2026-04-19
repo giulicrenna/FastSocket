@@ -1,5 +1,10 @@
 """
-Multi-Client Chat Server
+Secure Chat Server — RSA+AES hybrid encryption with PSK authentication.
+
+Handshake (automatic):
+  1. RSA-4096 key exchange → establishes AES-256-GCM session key
+  2. Both sides prove knowledge of the shared secret via HMAC-SHA256
+  3. All messages encrypted with AES-256-GCM (fast, unlimited size)
 
 Commands:
   /name <name>           - Set username
@@ -12,18 +17,19 @@ Commands:
   /quit                  - Disconnect
 """
 
-from FastSocket import FastSocketServer, SocketConfig, Queue
-from FastSocket.utils.framing import send_framed
+from FastSocket import TLSSocketServer, SocketConfig, Queue
 import time
 from datetime import datetime, timedelta
 from threading import Lock
 from typing import Dict, List, Optional, Tuple
 
+SHARED_SECRET = "fastsocket-secret"   # Change this before deploying!
 
-class ChatServer:
-    def __init__(self, host: str = 'localhost', port: int = 9000):
+
+class SecureChatServer:
+    def __init__(self, host: str = 'localhost', port: int = 9443):
         self.config = SocketConfig(host=host, port=port)
-        self.server = FastSocketServer(self.config)
+        self.server = TLSSocketServer(self.config, shared_secret=SHARED_SECRET)
 
         self.start_time = time.time()
         self.total_messages = 0
@@ -34,22 +40,22 @@ class ChatServer:
 
         self.server.on_new_message(self.handle_messages)
 
-    # ── low-level send helpers ────────────────────────────────────────────────
+    # ── send helpers ─────────────────────────────────────────────────────────
 
     def _send(self, addr: tuple, text: str) -> None:
-        """Send a message to one specific client."""
+        """Send an encrypted message to one client by address."""
         with self.server._client_lock:
             clients = list(self.server._client_buffer)
         for client in clients:
             if client.address == addr and client.connected:
                 try:
-                    send_framed(client.connection, text.encode('utf-8'))
+                    client.send(text.encode('utf-8'))
                 except OSError:
                     pass
                 break
 
     def _broadcast(self, text: str, exclude: tuple = None) -> None:
-        """Send a timestamped message to all connected clients."""
+        """Broadcast a timestamped encrypted message to all clients."""
         ts = datetime.now().strftime('%H:%M:%S')
         data = f"[{ts}] {text}".encode('utf-8')
         with self.server._client_lock:
@@ -57,7 +63,7 @@ class ChatServer:
         for client in clients:
             if client.connected and client.address != exclude:
                 try:
-                    send_framed(client.connection, data)
+                    client.send(data)
                 except OSError:
                     pass
 
@@ -71,7 +77,7 @@ class ChatServer:
     def _uptime(self) -> str:
         return str(timedelta(seconds=int(time.time() - self.start_time)))
 
-    # ── command implementations ───────────────────────────────────────────────
+    # ── command handlers ─────────────────────────────────────────────────────
 
     def _cmd_name(self, addr: tuple, args: str) -> None:
         new_name = args.strip()
@@ -113,6 +119,8 @@ class ChatServer:
             f"Active users:   {active}",
             f"Total messages: {total}",
             f"Avg msg/user:   {avg:.1f}",
+            "Encryption:     RSA-4096 + AES-256-GCM",
+            "Auth:           HMAC-SHA256 (PSK)",
         ]
         if top:
             lines.append("Top talkers:")
@@ -177,14 +185,13 @@ class ChatServer:
                     pass
                 break
 
-    # ── main message handler ──────────────────────────────────────────────────
+    # ── main handler ─────────────────────────────────────────────────────────
 
     def handle_messages(self, messages: Queue) -> None:
         while not messages.empty():
             msg, addr = messages.get()
             command = msg.strip()
 
-            # Auto-register on first message
             with self._lock:
                 if addr not in self.user_names:
                     self.user_names[addr] = f"User-{addr[1]}"
@@ -208,7 +215,7 @@ class ChatServer:
             elif command == '/quit':
                 self._cmd_quit(addr)
             elif command.startswith('/'):
-                self._send(addr, f"Unknown command. Type /help for the list.")
+                self._send(addr, "Unknown command. Type /help for the list.")
             else:
                 with self._lock:
                     username = self.user_names.get(addr, f"User-{addr[1]}")
@@ -220,16 +227,17 @@ class ChatServer:
 
     def start(self) -> None:
         print("=" * 60)
-        print("FastSocket Chat Server")
+        print("FastSocket Secure Chat  [RSA-4096 + AES-256-GCM + HMAC]")
         print("=" * 60)
         print(f"Listening on {self.config.host}:{self.config.port}")
         print(f"Started:   {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("Generating RSA key pair...")
         print("=" * 60)
         self.server.start()
 
 
 if __name__ == '__main__':
-    server = ChatServer(host='localhost', port=9000)
+    server = SecureChatServer(host='localhost', port=9443)
     server.start()
     try:
         while True:

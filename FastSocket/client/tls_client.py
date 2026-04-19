@@ -1,0 +1,144 @@
+"""
+Hybrid-encrypted TCP client for FastSocket.
+
+Performs RSA+HMAC key exchange on connect, then uses AES-256-GCM
+for all subsequent messages. Both ends authenticate each other
+before any application data flows.
+"""
+
+import socket
+from threading import Thread
+from typing import List, Callable
+
+from Crypto.PublicKey import RSA
+
+from FastSocket.core.config import SocketConfig
+from FastSocket.security.rsa_encryption import RSAEncryption
+from FastSocket.security.tls_encryption import (
+    generate_session_key, aes_encrypt, aes_decrypt,
+    hmac_sign, hmac_verify, rsa_encrypt_key,
+    HMAC_SIZE,
+)
+from FastSocket.utils.framing import send_framed, recv_framed
+from FastSocket.utils.logger import Logger
+
+
+class TLSSocketClient(Thread):
+    """
+    TCP client with hybrid RSA+AES encryption and PSK authentication.
+
+    Attributes:
+        connected: True after a successful handshake
+        _session_key: AES-256 session key shared with the server
+
+    Example:
+        >>> config = SocketConfig(host='localhost', port=9443)
+        >>> client = TLSSocketClient(config, shared_secret="my-secret")
+        >>> client.on_new_message(lambda msg: print(msg))
+        >>> client.start()
+        >>> # wait for client.connected == True
+        >>> client.send_to_server("Hello!")
+    """
+
+    def __init__(self,
+                 config: SocketConfig,
+                 shared_secret: str) -> None:
+        super().__init__()
+        self.daemon = True
+        self._config = config
+        self._shared_secret: bytes = (
+            shared_secret.encode('utf-8')
+            if isinstance(shared_secret, str)
+            else shared_secret
+        )
+        self._new_message_handler: List[Callable] = []
+        self._session_key: bytes = None
+        self.connected: bool = False
+        self.sock: socket.socket = self._config._create_socket()
+
+    # ── handshake ─────────────────────────────────────────────────────────────
+
+    def _handshake(self) -> bool:
+        try:
+            # Step 1: receive server RSA public key
+            pub_key_bytes = recv_framed(self.sock)
+            if not pub_key_bytes:
+                return False
+            server_pub_key = RSA.import_key(pub_key_bytes)
+
+            # Step 2: generate session key, encrypt with server's RSA pub key,
+            #         attach HMAC proof of PSK knowledge, send both
+            session_key   = generate_session_key()
+            encrypted_key = rsa_encrypt_key(server_pub_key, session_key)
+            auth_token    = hmac_sign(self._shared_secret, session_key)
+            send_framed(self.sock, encrypted_key + auth_token)
+
+            # Step 3: receive server's AES-encrypted OK + server auth token
+            raw = recv_framed(self.sock)
+            if not raw:
+                return False
+
+            if raw == b"AUTH_FAIL":
+                Logger.print_log_error("Authentication rejected by server.", "HybridClient")
+                return False
+
+            response = aes_decrypt(session_key, raw)
+
+            if not response.startswith(b"OK"):
+                return False
+
+            server_auth = response[2:2 + HMAC_SIZE]
+            if not hmac_verify(self._shared_secret, session_key + b"server", server_auth):
+                Logger.print_log_error("Server authentication failed (wrong PSK?)", "HybridClient")
+                return False
+
+            self._session_key = session_key
+            return True
+
+        except Exception as e:
+            Logger.print_log_error(e, 'TLSSocketClient handshake')
+            return False
+
+    # ── entry point ───────────────────────────────────────────────────────────
+
+    def run(self) -> None:
+        self.sock.connect((self._config.host, self._config.port))
+
+        if not self._handshake():
+            self.sock.close()
+            return
+
+        self.connected = True
+
+        for handler in self._new_message_handler:
+            Thread(target=self._recv_loop, args=(handler,), daemon=True).start()
+
+    # ── send / receive ────────────────────────────────────────────────────────
+
+    def send_to_server(self, msg: str) -> None:
+        """Send an AES-256-GCM encrypted message to the server."""
+        if not self.connected or self._session_key is None:
+            return
+        try:
+            send_framed(self.sock, aes_encrypt(self._session_key, msg.encode('utf-8')))
+        except Exception as e:
+            Logger.print_log_error(e, 'TLSSocketClient')
+            raise
+
+    def on_new_message(self, func: Callable) -> None:
+        """Register a callback: func(plaintext_str) called on each message."""
+        self._new_message_handler.append(func)
+
+    def _recv_loop(self, func: Callable) -> None:
+        while True:
+            try:
+                raw = recv_framed(self.sock)
+                if not raw:
+                    self.connected = False
+                    break
+                plaintext = aes_decrypt(self._session_key, raw).decode('utf-8')
+                func(plaintext)
+            except Exception as e:
+                Logger.print_log_error(e, 'TLSSocketClient')
+                self.connected = False
+                break

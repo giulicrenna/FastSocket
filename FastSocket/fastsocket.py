@@ -48,6 +48,7 @@ class ClientType(Thread):
                  connection: Types.CONNECTION,
                  address: Types.IPV4_PORT) -> None:
         super().__init__()
+        self.daemon = True
         self.connection: Types.CONNECTION = connection
         self.address: Types.IPV4_PORT = address
         self.message_queue: Queue = Queue()
@@ -69,6 +70,7 @@ class FastSocketClient(Thread):
                  config: SocketConfig,
                  _recv_size: int = 1024*10) -> None:
         super().__init__()
+        self.daemon = True
         self._config = config
         self._new_message_handler: List[Callable] = []
         self._recv_size = _recv_size
@@ -77,11 +79,11 @@ class FastSocketClient(Thread):
 
     def run(self) -> None:
         self.sock.connect((self._config.host, self._config.port))
-        
+
         for _message_handler in self._new_message_handler:
-            message_thread = Thread(target=self._run_new_message_handler, args=(_message_handler,))
+            message_thread = Thread(target=self._run_new_message_handler, args=(_message_handler,), daemon=True)
             message_thread.start()
-            
+
     def send_to_server(self, msg: str) -> None:
         try:
             message = msg.encode('utf-8')
@@ -107,6 +109,7 @@ class FastSocketServer(Thread):
     def __init__(self,
                  config: SocketConfig) -> None:
         super().__init__()
+        self.daemon = True
         self._config = config
         self._client_buffer: List[ClientType] = []
         self._new_message_handler: List[Callable] = []
@@ -116,12 +119,12 @@ class FastSocketServer(Thread):
         self.sock: Types.CONNECTION = self._config._create_socket()
         self.sock.bind((self._config.host, self._config.port))
         
-        task_wait_for_client = Thread(target=self._listen_for_new_clients)
+        task_wait_for_client = Thread(target=self._listen_for_new_clients, daemon=True)
         task_wait_for_client.start()
         for _message_handler in self._new_message_handler:
-            message_thread = Thread(target=self._run_new_message_handler, args=(_message_handler,))
+            message_thread = Thread(target=self._run_new_message_handler, args=(_message_handler,), daemon=True)
             message_thread.start()
-        
+
     def _listen_for_new_clients(self) -> None:
         while True:
             self.sock.settimeout(5)

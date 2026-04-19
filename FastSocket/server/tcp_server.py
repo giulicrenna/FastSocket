@@ -6,13 +6,14 @@ with support for multiple concurrent client connections.
 """
 
 import socket
-from threading import Thread
+from threading import Thread, Lock
 from typing import List, Callable
 
 from FastSocket.core.config import SocketConfig
 from FastSocket.core.client_handler import ClientType
 from FastSocket.utils.logger import Logger
 from FastSocket.utils.exceptions import InvalidMessageType
+from FastSocket.utils.framing import send_framed
 from FastSocket.utils.types import Types
 
 
@@ -27,6 +28,7 @@ class FastSocketServer(Thread):
     Attributes:
         _config: Socket configuration
         _client_buffer: List of connected client handlers
+        _client_lock: Lock protecting _client_buffer
         _new_message_handler: List of message handler functions
         sock: Server socket
 
@@ -44,57 +46,42 @@ class FastSocketServer(Thread):
 
     def __init__(self,
                  config: SocketConfig) -> None:
-        """
-        Initialize TCP server.
-
-        Args:
-            config: Socket configuration object
-        """
         super().__init__()
+        self.daemon = True
         self._config = config
         self._client_buffer: List[ClientType] = []
+        self._client_lock = Lock()
         self._new_message_handler: List[Callable] = []
 
     def run(self) -> None:
-        """
-        Start the server.
-
-        Creates the server socket, binds to the configured address,
-        and starts threads for listening to clients and handling messages.
-        """
         Logger.print_log_normal(f'Running server on {self._config.host}:{self._config.port}', 'Server')
         self.sock: socket.socket = self._config._create_socket()
         self.sock.bind((self._config.host, self._config.port))
 
-        task_wait_for_client = Thread(target=self._listen_for_new_clients)
+        task_wait_for_client = Thread(target=self._listen_for_new_clients, daemon=True)
         task_wait_for_client.start()
         for _message_handler in self._new_message_handler:
-            message_thread = Thread(target=self._run_new_message_handler, args=(_message_handler,))
+            message_thread = Thread(target=self._run_new_message_handler, args=(_message_handler,), daemon=True)
             message_thread.start()
 
-    def _listen_for_new_clients(self) -> None:
-        """
-        Listen for and accept new client connections.
+        task_wait_for_client.join()
 
-        Runs in a separate thread, accepting new connections and
-        creating ClientType handlers for each. Also removes
-        disconnected clients from the buffer.
-        """
+    def _listen_for_new_clients(self) -> None:
         while True:
             self.sock.settimeout(5)
             self.sock.listen()
 
             try:
-                for idx, client in enumerate(self._client_buffer):
-                    if not client.connected:
-                        del self._client_buffer[idx]
+                with self._client_lock:
+                    self._client_buffer = [c for c in self._client_buffer if c.connected]
 
                 conn, addr = self.sock.accept()
 
                 client_handler = ClientType(conn, addr)
                 client_handler.start()
 
-                self._client_buffer.append(client_handler)
+                with self._client_lock:
+                    self._client_buffer.append(client_handler)
             except socket.timeout:
                 pass
 
@@ -118,14 +105,10 @@ class FastSocketServer(Thread):
         self._new_message_handler.append(func)
 
     def _run_new_message_handler(self, _func: Callable) -> None:
-        """
-        Execute a message handler in a loop.
-
-        Args:
-            _func: Message handler function
-        """
         while True:
-            for client in self._client_buffer:
+            with self._client_lock:
+                clients = list(self._client_buffer)
+            for client in clients:
                 if client.connected:
                     _func(client.message_queue)
 
@@ -144,11 +127,18 @@ class FastSocketServer(Thread):
         """
         if type(message) not in [str, bytes]:
             raise InvalidMessageType
-        for idx, client in enumerate(self._client_buffer):
+        data = message.encode('utf-8') if isinstance(message, str) else message
+
+        with self._client_lock:
+            clients = list(self._client_buffer)
+
+        failed = []
+        for client in clients:
             try:
-                if type(message) == bytes:
-                    client.connection.sendall(message)
-                elif type(message) == str:
-                    client.connection.sendall(message.encode())
+                send_framed(client.connection, data)
             except OSError:
-                del self._client_buffer[idx]
+                failed.append(client)
+
+        if failed:
+            with self._client_lock:
+                self._client_buffer = [c for c in self._client_buffer if c not in failed]

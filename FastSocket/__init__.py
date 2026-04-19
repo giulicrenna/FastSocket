@@ -29,14 +29,20 @@ from FastSocket.core.config import SocketConfig, SockerConfig
 from FastSocket.server.tcp_server import FastSocketServer
 from FastSocket.server.secure_server import SecureFastSocketServer
 from FastSocket.server.udp_server import FastSocketUDPServer
+from FastSocket.server.tls_server import TLSSocketServer
 
 # Client exports
 from FastSocket.client.tcp_client import FastSocketClient
 from FastSocket.client.secure_client import SecureFastSocketClient
 from FastSocket.client.udp_client import FastSocketUDPClient
+from FastSocket.client.tls_client import TLSSocketClient
 
 # Security exports
 from FastSocket.security.rsa_encryption import RSAEncryption
+from FastSocket.security.tls_encryption import (
+    generate_session_key, aes_encrypt, aes_decrypt,
+    hmac_sign, hmac_verify,
+)
 
 # Utility exports
 from FastSocket.utils.logger import Logger, Color
@@ -72,14 +78,21 @@ __all__ = [
     'FastSocketServer',
     'SecureFastSocketServer',
     'FastSocketUDPServer',
+    'TLSSocketServer',
 
     # Clients
     'FastSocketClient',
     'SecureFastSocketClient',
     'FastSocketUDPClient',
+    'TLSSocketClient',
 
     # Security
     'RSAEncryption',
+    'generate_session_key',
+    'aes_encrypt',
+    'aes_decrypt',
+    'hmac_sign',
+    'hmac_verify',
 
     # Utils
     'Logger',

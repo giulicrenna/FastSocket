@@ -13,6 +13,7 @@ from typing import Tuple
 from Crypto.PublicKey import RSA
 
 from FastSocket.utils.types import Types
+from FastSocket.utils.framing import recv_framed
 from FastSocket.security.rsa_encryption import RSAEncryption
 from FastSocket.utils.logger import Logger
 
@@ -34,33 +35,24 @@ class ClientType(Thread):
     def __init__(self,
                  connection: socket.socket,
                  address: Tuple[str, int]) -> None:
-        """
-        Initialize client handler.
-
-        Args:
-            connection: Client socket connection
-            address: Client address (host, port)
-        """
         super().__init__()
+        self.daemon = True
         self.connection: socket.socket = connection
         self.address: Tuple[str, int] = address
         self.message_queue: Queue = Queue()
         self.connected: bool = True
 
     def run(self):
-        """
-        Main loop for receiving messages from client.
-
-        Continuously receives data from the client and adds it to
-        the message queue. Sets connected=False on error.
-        """
         while True:
             try:
-                data = self.connection.recv(1024)
-                if data:
-                    message = data.decode("utf-8")
-                    self.message_queue.put((message, self.address))
-            except:
+                data = recv_framed(self.connection)
+                if not data:
+                    # Empty bytes means peer closed the connection
+                    self.connected = False
+                    self.connection.close()
+                    break
+                self.message_queue.put((data.decode("utf-8"), self.address))
+            except Exception:
                 self.connected = False
                 self.connection.close()
                 break
@@ -88,16 +80,8 @@ class SecureClientType(Thread):
                  address: Tuple[str, int],
                  recv_size: int,
                  server_security: RSAEncryption) -> None:
-        """
-        Initialize secure client handler.
-
-        Args:
-            connection: Client socket connection
-            address: Client address (host, port)
-            recv_size: Maximum bytes to receive at once
-            server_security: Server's RSA encryption handler
-        """
         super().__init__()
+        self.daemon = True
         self.connection: socket.socket = connection
         self.address: Tuple[str, int] = address
         self.message_queue: Queue = Queue()
@@ -108,29 +92,31 @@ class SecureClientType(Thread):
         self.server_security = server_security
 
     def run(self):
-        """
-        Main loop for receiving encrypted messages.
-
-        First receives client's public key, then continuously receives
-        and decrypts messages from the client.
-        """
         while True:
             try:
                 if self.public_key is None:
                     try:
                         pub_key_bytes = self.connection.recv(self._recv_size)
+                        if not pub_key_bytes:
+                            self.connected = False
+                            self.connection.close()
+                            break
                         self.public_key = RSA.import_key(pub_key_bytes)
                         Logger.print_log_debug(self.public_key)
-                    except:
-                        self.connection.sendall(f'Invalid Public Key'.encode('utf-8'))
+                    except Exception as e:
+                        self.connection.sendall('Invalid Public Key'.encode('utf-8'))
+                        Logger.print_log_error(e, 'SecureClientType key exchange')
                 else:
                     data: bytes = self.connection.recv(self._recv_size)
-                    if data:
-                        message = self.server_security.decrypt(data)
-                        self.message_queue.put((message, self.address))
+                    if not data:
+                        self.connected = False
+                        self.connection.close()
+                        break
+                    message = self.server_security.decrypt(data)
+                    self.message_queue.put((message, self.address))
                 self.connected = True
             except Exception as e:
-                Logger.print_log_error(e, 'ClientType')
+                Logger.print_log_error(e, 'SecureClientType')
                 self.connected = False
                 self.connection.close()
                 break
