@@ -1,17 +1,17 @@
-# Ejemplo: File Transfer
+# Example: File Transfer
 
-Archivos:
+Files:
 
 - `examples/file_transfer/server.py`
 - `examples/file_transfer/client.py`
 
-## Qué muestra
+## What it shows
 
-- Listado de archivos disponibles
-- Envío/recepción con progreso
-- Verificación de integridad por hash
+- Listing available files
+- Send and receive with progress tracking
+- Hash-based integrity verification
 
-## Ejecutar
+## Run
 
 ```bash
 python examples/file_transfer/server.py

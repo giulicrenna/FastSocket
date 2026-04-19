@@ -1,17 +1,17 @@
-# Instalación
+# Installation
 
-## Requisitos
+## Requirements
 
 - Python 3.8+
 - pip
 
-## Instalar desde PyPI
+## Install from PyPI
 
 ```bash
 pip install FastSocket
 ```
 
-## Instalar desde el repo (modo desarrollo)
+## Install from source (development mode)
 
 ```bash
 git clone https://github.com/giulicrenna/FastSocket.git
@@ -19,10 +19,10 @@ cd FastSocket
 pip install -e .
 ```
 
-## Verificación rápida
+## Quick verification
 
 ```bash
 python -c "from FastSocket import FastSocketServer, SocketConfig; print('OK')"
 ```
 
-Si imprime `OK`, ya está listo.
+If it prints `OK`, you're ready to go.

@@ -1,21 +1,21 @@
 # Roadmap
 
-Posibles mejoras y features planeadas para FastSocket.
+Planned features and improvements for FastSocket.
 
 ## v2.x
 
-- [ ] Soporte nativo TLS/SSL (via `ssl` stdlib)
-- [ ] Reconexión automática en cliente TCP
-- [ ] API async/await (`asyncio`)
-- [ ] Compresión de mensajes (zlib / lz4)
-- [ ] Métricas exportables (Prometheus / JSON)
+- [ ] Native TLS/SSL support (via Python `ssl` stdlib)
+- [ ] Auto-reconnect for TCP clients
+- [ ] `async`/`await` API (`asyncio`)
+- [ ] Message compression (zlib / lz4)
+- [ ] Exportable metrics (Prometheus / JSON)
 
 ## v3.x
 
 - [ ] WebSocket support
-- [ ] Multiplexing de canales sobre una sola conexión
-- [ ] Bindings para otros lenguajes (Go, Rust)
+- [ ] Channel multiplexing over a single connection
+- [ ] Bindings for other languages (Go, Rust)
 
-## Contribuciones
+## Contributions
 
-Las sugerencias son bienvenidas vía [Issues](https://github.com/giulicrenna/FastSocket/issues) o Pull Requests.
+Suggestions are welcome via [Issues](https://github.com/giulicrenna/FastSocket/issues) or Pull Requests.

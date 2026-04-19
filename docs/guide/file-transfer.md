@@ -1,8 +1,8 @@
-# Guía File Transfer
+# File Transfer Guide
 
-`FileTransfer` simplifica envío/recepción de archivos, con progreso y verificación de integridad.
+`FileTransfer` simplifies sending and receiving files with progress tracking and integrity verification.
 
-## Inicialización
+## Initialization
 
 ```python
 from FastSocket import FileTransfer
@@ -14,21 +14,21 @@ ft = FileTransfer(
 )
 ```
 
-## Enviar archivo
+## Send a file
 
 ```python
-stats = ft.send_file("./mi_archivo.bin", connection)
+stats = ft.send_file("./my_file.bin", connection)
 print(stats)
 ```
 
-## Recibir archivo
+## Receive a file
 
 ```python
 stats = ft.receive_file(connection, save_path="./downloads")
 print(stats["integrity_valid"])
 ```
 
-## Recomendaciones
+## Tips
 
-- Usar `sha256` para balance entre seguridad y velocidad.
-- Definir callbacks de progreso en transferencias largas.
+- Use `sha256` for a good balance between security and speed.
+- Define progress callbacks for long transfers to track status in real time.

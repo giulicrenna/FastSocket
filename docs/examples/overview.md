@@ -1,17 +1,19 @@
-# Ejemplos
+# Examples
 
-FastSocket incluye ejemplos listos para ejecutar en `examples/`.
+FastSocket includes ready-to-run examples in the `examples/` directory.
 
-## Índice
+## Index
 
-- Echo
-- Chat
-- Secure Chat
-- Chunks
-- File Transfer
-- UDP (incluye broadcast)
-- Metrics en tiempo real
-- Benchmarks de performance
-- Stress test
+| Example | Description |
+|---|---|
+| [Echo](echo.md) | Basic request-response echo server and client |
+| [Chat](chat.md) | Multi-client text chat |
+| [Secure Chat](secure-chat.md) | Chat with RSA encryption |
+| [Chunks](chunks.md) | Large data splitting and reassembly |
+| [File Transfer](file-transfer.md) | Directory transfer with integrity checks |
+| [UDP](udp.md) | UDP unicast and broadcast scenarios |
+| [Metrics](metrics.md) | Real-time connection monitoring |
+| [Benchmarks](benchmarks.md) | TCP vs UDP performance comparison |
+| [Stress Test](stress-test.md) | Load generation and testing |
 
-> Tip: en general corré servidor primero y luego cliente(s).
+> **Tip:** In general, start the server first, then the client(s).

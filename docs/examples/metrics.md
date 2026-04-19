@@ -1,16 +1,16 @@
-# Ejemplo: Metrics en tiempo real
+# Example: Real-Time Metrics
 
-Archivo:
+File:
 
 - `examples/metrics/realtime_monitor.py`
 
-## Qué muestra
+## What it shows
 
-- Dashboard de métricas en consola
-- Throughput, bandwidth, conexiones activas y picos
-- Estadísticas acumuladas de runtime
+- Console metrics dashboard
+- Throughput, bandwidth, active connections, and peaks
+- Accumulated runtime statistics
 
-## Ejecutar
+## Run
 
 ```bash
 python examples/metrics/realtime_monitor.py

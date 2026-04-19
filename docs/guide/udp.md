@@ -1,8 +1,8 @@
-# Guía UDP
+# UDP Guide
 
-FastSocket incluye cliente y servidor UDP para casos donde priorizás baja latencia y simplicidad de datagramas.
+FastSocket includes UDP client and server support for low-latency, datagram-based communication.
 
-## Servidor UDP
+## UDP Server
 
 ```python
 from FastSocket import FastSocketUDPServer, SocketConfig, Queue
@@ -20,26 +20,26 @@ server.on_new_message(handle_messages)
 server.start()
 ```
 
-## Cliente UDP
+## UDP Client
 
 ```python
 from FastSocket import FastSocketUDPClient, SocketConfig
 import socket
 
 def on_response(msg: str, addr: tuple):
-    print("Respuesta:", msg, "desde", addr)
+    print("Response:", msg, "from", addr)
 
 config = SocketConfig(host="localhost", port=9000, type=socket.SOCK_DGRAM)
 client = FastSocketUDPClient(config)
 client.on_new_message(on_response)
 client.bind(("0.0.0.0", 9001))
 client.start()
-client.send_to_server("hola udp")
+client.send_to_server("hello udp")
 ```
 
-## Recomendaciones
+## Tips
 
-- UDP no garantiza orden ni entrega — usarlo para datos donde la pérdida ocasional es aceptable (telemetría, juegos, discovery).
-- Para mensajes críticos, preferir TCP o agregar ACKs manuales.
-- Limitar el tamaño de datagrama a ≤1400 bytes para evitar fragmentación IP.
-- El broadcast requiere `enable_broadcast=True` en el servidor.
+- UDP does not guarantee delivery or ordering — use it for data where occasional loss is acceptable (telemetry, games, discovery).
+- For critical messages, prefer TCP or implement manual ACKs.
+- Keep datagram size to ≤1400 bytes to avoid IP fragmentation.
+- Broadcast requires `enable_broadcast=True` on the server.

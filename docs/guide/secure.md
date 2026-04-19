@@ -1,8 +1,8 @@
-# Guía Secure (RSA)
+# Secure Guide (RSA)
 
-FastSocket incluye variantes seguras (`SecureFastSocketServer` y `SecureFastSocketClient`) que usan RSA.
+FastSocket provides secure variants (`SecureFastSocketServer` and `SecureFastSocketClient`) that use RSA-4096 encryption for all messages.
 
-## Servidor seguro
+## Secure Server
 
 ```python
 from FastSocket import SecureFastSocketServer, SocketConfig, Queue
@@ -18,7 +18,7 @@ server.on_new_message(handle_messages)
 server.start()
 ```
 
-## Cliente seguro
+## Secure Client
 
 ```python
 from FastSocket import SecureFastSocketClient, SocketConfig
@@ -29,10 +29,10 @@ def on_message(msg: str):
 client = SecureFastSocketClient(SocketConfig(host="localhost", port=9443))
 client.on_new_message(on_message)
 client.start()
-client.send_to_server("mensaje cifrado")
+client.send_to_server("encrypted message")
 ```
 
-## Notas
+## Notes
 
-- RSA no está optimizado para mensajes muy grandes.
-- Para cargas altas y mensajes más largos, considerar modo Hybrid.
+- RSA is not optimized for large or continuous messages.
+- For high throughput or longer messages, consider [Hybrid TLS mode](hybrid.md) instead.

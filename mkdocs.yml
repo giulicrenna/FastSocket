@@ -1,12 +1,12 @@
 site_name: FastSocket Docs
-site_description: Documentación oficial de FastSocket (TCP/UDP, secure, chunks, file transfer, ejemplos y API).
+site_description: Official documentation for FastSocket — TCP/UDP, secure, chunks, file transfer, examples and API reference.
 site_url: https://giulicrenna.github.io/FastSocket/
 repo_url: https://github.com/giulicrenna/FastSocket
 repo_name: giulicrenna/FastSocket
 
 theme:
   name: material
-  language: es
+  language: en
   favicon: https://raw.githubusercontent.com/giulicrenna/FastSocket/main/assets/20240219_232307_logo.png
   features:
     - navigation.tabs
@@ -22,13 +22,13 @@ theme:
       accent: cyan
       toggle:
         icon: material/weather-night
-        name: Cambiar a modo oscuro
+        name: Switch to dark mode
     - scheme: slate
       primary: indigo
       accent: cyan
       toggle:
         icon: material/weather-sunny
-        name: Cambiar a modo claro
+        name: Switch to light mode
 
 markdown_extensions:
   - admonition
@@ -50,20 +50,20 @@ plugins:
             heading_level: 2
 
 nav:
-  - Inicio: index.md
+  - Home: index.md
   - Getting Started:
-      - Instalación: getting-started/installation.md
+      - Installation: getting-started/installation.md
       - Quickstart: getting-started/quickstart.md
-  - Guía:
+  - Guide:
       - TCP: guide/tcp.md
       - UDP: guide/udp.md
       - Secure (RSA): guide/secure.md
       - Chunks: guide/chunks.md
       - File Transfer: guide/file-transfer.md
-      - Modo Hybrid (RSA + AES + HMAC): guide/hybrid.md
-      - Manejo de errores: guide/errors.md
-  - Ejemplos:
-      - Resumen: examples/overview.md
+      - Hybrid TLS (RSA + AES + HMAC): guide/hybrid.md
+      - Error Handling: guide/errors.md
+  - Examples:
+      - Overview: examples/overview.md
       - Echo: examples/echo.md
       - Chat: examples/chat.md
       - Secure Chat: examples/secure-chat.md
@@ -74,7 +74,7 @@ nav:
       - Benchmarks: examples/benchmarks.md
       - Stress Test: examples/stress-test.md
   - API Reference:
-      - Introducción: api/index.md
+      - Overview: api/index.md
       - FastSocket (legacy): api/legacy.md
       - Core: api/core.md
       - Server: api/server.md
@@ -82,5 +82,5 @@ nav:
       - Security: api/security.md
       - Utils: api/utils.md
   - Roadmap: roadmap.md
-  - Contribuir: contributing.md
+  - Contributing: contributing.md
   - Changelog: changelog.md

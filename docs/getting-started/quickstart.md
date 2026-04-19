@@ -1,6 +1,6 @@
 # Quickstart
 
-## 1) Servidor TCP básico
+## 1) Basic TCP Server
 
 ```python
 from FastSocket import FastSocketServer, SocketConfig, Queue
@@ -17,7 +17,7 @@ server.on_new_message(on_messages)
 server.start()
 ```
 
-## 2) Cliente TCP básico
+## 2) Basic TCP Client
 
 ```python
 from FastSocket import FastSocketClient, SocketConfig
@@ -32,13 +32,14 @@ client.on_new_message(on_message)
 client.start()
 
 while True:
-    client.send_to_server("Hola FastSocket")
+    client.send_to_server("Hello FastSocket")
     time.sleep(1)
 ```
 
-## 3) Siguiente paso
+## 3) Next steps
 
-- UDP: [Guía UDP](../guide/udp.md)
-- Seguridad RSA: [Guía Secure](../guide/secure.md)
-- Payloads grandes: [Guía Chunks](../guide/chunks.md)
-- Transferencia de archivos: [Guía File Transfer](../guide/file-transfer.md)
+- UDP: [UDP Guide](../guide/udp.md)
+- RSA Security: [Secure Guide](../guide/secure.md)
+- Large payloads: [Chunks Guide](../guide/chunks.md)
+- File transfer: [File Transfer Guide](../guide/file-transfer.md)
+- Hybrid TLS: [Hybrid Guide](../guide/hybrid.md)

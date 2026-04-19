@@ -1,19 +1,19 @@
-# Ejemplo: Secure Chat
+# Example: Secure Chat
 
-Archivo principal:
+Main file:
 
 - `examples/secure_chat/server.py`
 
-## Qué muestra
+## What it shows
 
-- Chat con cifrado RSA
-- Broadcast y mensajes privados cifrados
-- Métricas del servidor seguro
+- Chat with RSA encryption
+- Encrypted broadcast and private messages
+- Secure server metrics
 
-## Ejecutar
+## Run
 
 ```bash
 python examples/secure_chat/server.py
 ```
 
-Luego conectá clientes seguros compatibles al mismo host/puerto.
+Then connect compatible secure clients to the same host and port.

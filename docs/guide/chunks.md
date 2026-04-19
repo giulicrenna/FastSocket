@@ -1,8 +1,8 @@
-# Guía Chunks
+# Chunks Guide
 
-`ChunkManager` permite dividir y recomponer payloads grandes para transferencias robustas.
+`ChunkManager` lets you split and reassemble large payloads for reliable transfers.
 
-## Uso básico
+## Basic usage
 
 ```python
 from FastSocket import ChunkManager
@@ -15,18 +15,18 @@ rebuilt = manager.reassemble_chunks(chunks)
 assert rebuilt == data
 ```
 
-## Envío/recepción sobre socket
+## Sending and receiving over a socket
 
 ```python
-# enviar
+# Send
 bytes_sent = manager.send_chunked(sock, data)
 
-# recibir
+# Receive
 received = manager.receive_chunked(sock)
 ```
 
-## Cuándo usarlo
+## When to use it
 
-- Archivos o blobs grandes
-- Mensajes que exceden límites prácticos de buffer
-- Casos donde querés estimar overhead y cantidad de paquetes
+- Files or large binary blobs
+- Messages that exceed practical buffer limits
+- Cases where you need to estimate packet count and overhead

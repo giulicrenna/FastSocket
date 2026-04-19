@@ -1,18 +1,18 @@
-# Ejemplo: Chunks
+# Example: Chunks
 
-Archivos:
+Files:
 
 - `examples/chunks/chunk_demo.py`
 - `examples/chunks/server_with_chunks.py`
 - `examples/chunks/client_with_chunks.py`
 
-## Qué muestra
+## What it shows
 
-- División/reensamblado de datos grandes
-- Envío chunked sobre TCP
-- Estimación de overhead por chunk
+- Splitting and reassembly of large data
+- Chunked transfer over TCP
+- Per-chunk overhead estimation
 
-## Ejecutar
+## Run
 
 ```bash
 python examples/chunks/chunk_demo.py

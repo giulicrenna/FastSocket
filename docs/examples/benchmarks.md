@@ -1,16 +1,16 @@
-# Ejemplo: Benchmarks
+# Example: Benchmarks
 
-Archivos:
+Files:
 
 - `examples/benchmarks/performance_test.py`
 - `examples/benchmarks/tcp_vs_udp.py`
 
-## Qué muestra
+## What it shows
 
-- Benchmark de chunking, overhead y throughput
-- Comparación TCP vs UDP (latencia, pérdida de paquetes, MB/s)
+- Benchmark for chunking, overhead, and throughput
+- TCP vs UDP comparison (latency, packet loss, MB/s)
 
-## Ejecutar
+## Run
 
 ```bash
 python examples/benchmarks/performance_test.py

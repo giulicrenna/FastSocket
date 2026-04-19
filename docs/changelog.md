@@ -2,15 +2,15 @@
 
 ## [2.0.0]
 
-- Reescritura completa con estructura de paquete modular.
-- Soporte TLS Hybrid (RSA-4096 + AES-256-GCM + HMAC).
-- `ChunkManager` para payloads grandes.
-- `FileTransfer` con verificación de integridad por hash.
-- Soporte UDP con broadcast.
-- Suite de ejemplos: echo, chat, secure chat, chunks, file transfer, UDP, benchmarks, stress test.
-- `mkdocs` con tema Material para documentación.
+- Complete rewrite with modular package structure.
+- Hybrid TLS mode (RSA-4096 + AES-256-GCM + HMAC).
+- `ChunkManager` for large payload splitting and reassembly.
+- `FileTransfer` with SHA-256 integrity verification.
+- UDP support with broadcast.
+- Example suite: echo, chat, secure chat, chunks, file transfer, UDP, benchmarks, stress test.
+- MkDocs with Material theme for documentation.
 
 ## [1.x]
 
-- API inicial TCP/UDP con soporte RSA básico.
-- Servidor multi-cliente con threads.
+- Initial TCP/UDP API with basic RSA support.
+- Multi-client server with threads.

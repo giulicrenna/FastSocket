@@ -1,8 +1,8 @@
-# Contribuir
+# Contributing
 
-¡Las contribuciones son bienvenidas! Seguí estos pasos para colaborar.
+Contributions are welcome! Follow these steps to collaborate.
 
-## Setup de desarrollo
+## Development setup
 
 ```bash
 git clone https://github.com/giulicrenna/FastSocket.git
@@ -10,29 +10,29 @@ cd FastSocket
 pip install -e ".[dev]"
 ```
 
-## Ejecutar tests
+## Running tests
 
 ```bash
 pytest tests/
 ```
 
-## Estilo de código
+## Code style
 
-- Seguir PEP 8.
-- Tipado con `typing` en firmas públicas.
-- Docstrings en clases y métodos públicos.
+- Follow [PEP 8](https://peps.python.org/pep-0008/).
+- Use `typing` annotations in public signatures.
+- Add docstrings to public classes and methods.
 
 ## Pull Requests
 
-1. Crear un branch desde `main`.
-2. Hacer los cambios con commits descriptivos.
-3. Abrir un PR explicando el motivo del cambio.
-4. Esperar revisión antes de mergear.
+1. Create a branch from `main`.
+2. Make changes with descriptive commits.
+3. Open a PR explaining the motivation for the change.
+4. Wait for review before merging.
 
-## Reportar bugs
+## Reporting bugs
 
-Usar [GitHub Issues](https://github.com/giulicrenna/FastSocket/issues) con:
+Use [GitHub Issues](https://github.com/giulicrenna/FastSocket/issues) and include:
 
-- Versión de Python y FastSocket.
-- Reproducción mínima del problema.
-- Traceback completo si aplica.
+- Python and FastSocket version.
+- Minimal reproduction of the problem.
+- Full traceback if applicable.

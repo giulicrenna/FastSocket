@@ -1,27 +1,27 @@
-# Guía TLS Hybrid (RSA + AES-256-GCM + HMAC)
+# Hybrid TLS Guide (RSA + AES-256-GCM + HMAC)
 
-El modo **TLS Hybrid** combina:
+The **Hybrid TLS mode** combines:
 
-- Intercambio de clave de sesión con **RSA-4096**
-- Cifrado de payload con **AES-256-GCM**
-- Autenticación mutua con **HMAC** usando un secreto compartido (PSK)
+- **RSA-4096** for session key exchange
+- **AES-256-GCM** for payload encryption
+- **HMAC** with a pre-shared key (PSK) for mutual authentication
 
-Esto da mejor rendimiento que RSA puro para mensajes continuos y autentica ambos extremos antes de enviar datos.
+This gives better throughput than pure RSA for continuous messaging, while authenticating both endpoints before any data is exchanged.
 
-## Servidor
+## Server
 
 ```python
 from FastSocket import TLSSocketServer, SocketConfig
 
 server = TLSSocketServer(
     SocketConfig(host="localhost", port=9555),
-    shared_secret="mi-secreto-super-fuerte"
+    shared_secret="my-very-strong-secret"
 )
 server.on_new_message(lambda q: print(q.get()))
 server.start()
 ```
 
-## Cliente
+## Client
 
 ```python
 from FastSocket import TLSSocketClient, SocketConfig
@@ -31,29 +31,29 @@ def on_message(msg: str):
 
 client = TLSSocketClient(
     SocketConfig(host="localhost", port=9555),
-    shared_secret="mi-secreto-super-fuerte"
+    shared_secret="my-very-strong-secret"
 )
 client.on_new_message(on_message)
 client.start()
 
-# Esperar a que el handshake termine
+# Wait for the handshake to complete
 import time
 while not client.connected:
     time.sleep(0.05)
 
-client.send_to_server("mensaje cifrado")
+client.send_to_server("encrypted message")
 ```
 
-## Flujo del handshake
+## Handshake flow
 
-1. Servidor envía su clave pública RSA.
-2. Cliente genera `session_key` aleatoria, la encripta con RSA y adjunta un token HMAC del PSK.
-3. Servidor verifica el HMAC, desencripta la `session_key` y responde con `OK` + su propio HMAC.
-4. A partir de ahí, todos los mensajes viajan cifrados con AES-256-GCM.
+1. Server sends its RSA public key.
+2. Client generates a random `session_key`, encrypts it with RSA, and attaches an HMAC token of the PSK.
+3. Server verifies the HMAC, decrypts the `session_key`, and responds with `OK` + its own HMAC.
+4. From that point on, all messages are encrypted with AES-256-GCM.
 
-## Buenas prácticas
+## Best practices
 
-- Usar PSK largo y aleatorio (mínimo 32 caracteres).
-- Rotar secretos periódicamente en entornos productivos.
-- No hardcodear secretos en código público — usar variables de entorno.
-- Verificar `client.connected` antes de llamar a `send_to_server`.
+- Use a long, random PSK (minimum 32 characters).
+- Rotate secrets periodically in production environments.
+- Never hardcode secrets in public code — use environment variables.
+- Always check `client.connected` before calling `send_to_server`.

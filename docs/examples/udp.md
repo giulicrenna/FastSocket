@@ -1,18 +1,18 @@
-# Ejemplo: UDP
+# Example: UDP
 
-Archivos:
+Files:
 
 - `examples/udp/server.py`
 - `examples/udp/client.py`
 - `examples/udp/broadcast.py`
 
-## Qué muestra
+## What it shows
 
-- Echo sobre UDP
-- Envío y recepción de datagramas
-- Broadcast para discovery
+- Echo over UDP
+- Datagram send and receive
+- Broadcast for service discovery
 
-## Ejecutar
+## Run
 
 ```bash
 python examples/udp/server.py

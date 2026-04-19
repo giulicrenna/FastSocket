@@ -1,8 +1,8 @@
-# Guía TCP
+# TCP Guide
 
-FastSocket ofrece una API directa para levantar servidores y clientes TCP con múltiples conexiones.
+FastSocket provides a straightforward API for running TCP servers and clients with multi-connection support.
 
-## Servidor TCP
+## TCP Server
 
 ```python
 from FastSocket import FastSocketServer, SocketConfig, Queue
@@ -19,7 +19,7 @@ server.on_new_message(handle_messages)
 server.start()
 ```
 
-## Cliente TCP
+## TCP Client
 
 ```python
 from FastSocket import FastSocketClient, SocketConfig
@@ -30,11 +30,11 @@ def on_message(msg: str):
 client = FastSocketClient(SocketConfig(host="localhost", port=8080))
 client.on_new_message(on_message)
 client.start()
-client.send_to_server("hola")
+client.send_to_server("hello")
 ```
 
-## Recomendaciones
+## Tips
 
-- Definí callbacks rápidos para no bloquear el loop de recepción.
-- Validá el tipo de dato antes de enviar.
-- Para payloads grandes, usar `ChunkManager`.
+- Keep callbacks fast to avoid blocking the receive loop.
+- Validate data types before sending.
+- For large payloads, use [`ChunkManager`](chunks.md).

@@ -1,16 +1,16 @@
-# Ejemplo: Stress Test
+# Example: Stress Test
 
-Archivo:
+File:
 
 - `examples/stress_test/load_test.py`
 
-## Qué muestra
+## What it shows
 
-- Test de concurrencia con muchos clientes
-- Carga sostenida en mensajes/segundo
-- Test de potencial memory leak (si está `psutil`)
+- Concurrency test with many simultaneous clients
+- Sustained load in messages per second
+- Memory leak detection (requires `psutil`)
 
-## Ejecutar
+## Run
 
 ```bash
 python examples/stress_test/load_test.py

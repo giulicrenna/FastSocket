@@ -1,17 +1,17 @@
-# Ejemplo: Echo
+# Example: Echo
 
-Archivos:
+Files:
 
 - `examples/echo/server.py`
 - `examples/echo/client.py`
 
-## Qué muestra
+## What it shows
 
-- Server TCP básico
-- Cliente que envía mensajes periódicos
-- Respuesta de stream desde servidor
+- Basic TCP server
+- Client that sends periodic messages
+- Stream response from server
 
-## Ejecutar
+## Run
 
 ```bash
 python examples/echo/server.py

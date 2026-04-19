@@ -1,20 +1,22 @@
-# Manejo de errores
+# Error Handling
 
-FastSocket expone excepciones específicas para casos comunes.
+FastSocket exposes specific exception classes for common failure scenarios.
 
-## Excepciones destacadas
+## Available exceptions
 
-- `FastSocketException`
-- `InvalidMessageType`
-- `NetworkException`
-- `BadEncryptionInput`
-- `ConnectionClosedException`
-- `FileTransferException`
-- `IntegrityException`
-- `ChunkException`
-- `TimeoutException`
+| Exception | Description |
+|---|---|
+| `FastSocketException` | Base exception for all FastSocket errors |
+| `InvalidMessageType` | Message type not supported |
+| `NetworkException` | Network-level failure |
+| `BadEncryptionInput` | Invalid encryption input |
+| `ConnectionClosedException` | Remote connection closed unexpectedly |
+| `FileTransferException` | Error during file transfer |
+| `IntegrityException` | Hash or integrity check failed |
+| `ChunkException` | Error during chunk splitting or reassembly |
+| `TimeoutException` | Operation timed out |
 
-## Patrón recomendado
+## Recommended pattern
 
 ```python
 from FastSocket import FastSocketClient, SocketConfig
@@ -24,7 +26,7 @@ try:
     client = FastSocketClient(SocketConfig(host="localhost", port=8080))
     client.start()
 except (NetworkException, TimeoutException) as e:
-    print(f"Error de red: {e}")
+    print(f"Network error: {e}")
 except Exception as e:
-    print(f"Error inesperado: {e}")
+    print(f"Unexpected error: {e}")
 ```

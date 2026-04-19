@@ -1,17 +1,17 @@
-# Ejemplo: Chat
+# Example: Chat
 
-Archivos:
+Files:
 
 - `examples/chat/server.py`
 - `examples/chat/client.py`
 
-## Qué muestra
+## What it shows
 
-- Chat multi-cliente
-- Comandos (`/name`, `/users`, `/metrics`, `/whisper`, `/help`, `/quit`)
-- Métricas simples de sesión
+- Multi-client chat
+- Commands (`/name`, `/users`, `/metrics`, `/whisper`, `/help`, `/quit`)
+- Simple session metrics
 
-## Ejecutar
+## Run
 
 ```bash
 python examples/chat/server.py

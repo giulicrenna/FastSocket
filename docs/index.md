@@ -1,19 +1,20 @@
-# FastSocket 🚀
+# FastSocket
 
-Documentación oficial de **FastSocket**, una librería Python para construir servidores y clientes **TCP/UDP**, con soporte **secure (RSA)**, transferencias por **chunks**, **file transfer** y modo **hybrid**.
+Official documentation for **FastSocket**, a Python library for building **TCP/UDP** servers and clients with support for **secure (RSA)** communication, **chunked transfers**, **file transfer**, and a **hybrid TLS** mode.
 
-> Pensado para prototipos rápidos y casos reales con múltiples conexiones.
+> Designed for rapid prototyping and production use with multi-connection handling.
 
-## Features principales
+## Features
 
-- ⚡ API simple para cliente/servidor TCP
-- 📡 Soporte UDP (unicast + broadcast)
-- 🔐 Comunicación segura con RSA
-- 🧩 Chunking automático para payloads grandes
-- 📁 Transferencia de archivos con hash/integridad
-- 🧪 Suite de ejemplos, benchmarks y stress tests
+- **Simple API** for TCP and UDP clients and servers
+- **UDP support** — unicast and broadcast
+- **RSA encryption** — secure mode with RSA-4096 key pairs
+- **Hybrid TLS mode** — RSA handshake + AES-256-GCM + HMAC authentication
+- **ChunkManager** — automatic splitting and reassembly of large payloads
+- **FileTransfer** — file transfers with progress callbacks and SHA-256 integrity checks
+- **Examples & benchmarks** — ready-to-run suite included
 
-## Instalación rápida
+## Quick Install
 
 ```bash
 pip install FastSocket
@@ -35,9 +36,9 @@ server.on_new_message(handle_messages)
 server.start()
 ```
 
-Seguí por:
+## Where to go next
 
-1. **Getting Started** para instalación y primer proyecto.
-2. **Guía** para TCP, UDP, secure, chunks y file transfer.
-3. **Ejemplos** para casos completos listos para correr.
-4. **API Reference** para detalle de clases y funciones.
+1. [**Getting Started**](getting-started/installation.md) — installation and first project.
+2. [**Guide**](guide/tcp.md) — TCP, UDP, secure, chunks, and file transfer.
+3. [**Examples**](examples/overview.md) — complete, runnable examples.
+4. [**API Reference**](api/index.md) — classes and functions in detail.
