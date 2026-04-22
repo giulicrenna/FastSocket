@@ -163,6 +163,10 @@ All servers expose `stop()` for graceful shutdown.
 | `FileTransfer` | File transfer with progress callbacks and hash verification |
 | `SocketConfig` | Configuration object for host, port, and socket type |
 
+## What's new in 2.1.1
+
+- **Package renamed** — `pip install fastsocket` (was `FastSocket`). Import also updated: `from fastsocket import ...`.
+
 ## What's new in 2.1.0
 
 - **Busy-loop fix** — message handler threads now sleep when queues are idle instead of spinning at 100% CPU.

@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.1] — 2026-04-22
+
+- Renamed Python import from `FastSocket` to `fastsocket` (lowercase) to match the package directory.
+- Renamed PyPI package from `FastSocket` to `fastsocket`.
+- All docs, examples, and tests updated accordingly.
+
 ## [2.1.0] — 2026-04-22
 
 ### Bug fixes
