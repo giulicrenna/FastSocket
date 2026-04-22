@@ -17,13 +17,13 @@ Official documentation for **FastSocket**, a Python library for building **TCP/U
 ## Quick Install
 
 ```bash
-pip install FastSocket
+pip install fastsocket
 ```
 
 ## Quickstart
 
 ```python
-from FastSocket import FastSocketServer, SocketConfig, Queue
+from fastsocket import FastSocketServer, SocketConfig, Queue
 
 def handle_messages(messages: Queue):
     while not messages.empty():

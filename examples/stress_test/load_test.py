@@ -13,7 +13,7 @@ import time
 import threading
 import statistics
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from FastSocket import FastSocketServer, FastSocketClient, SocketConfig, Queue
+from fastsocket import FastSocketServer, FastSocketClient, SocketConfig, Queue
 
 
 class LoadTester:

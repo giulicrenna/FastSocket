@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 import time
 import statistics
-from FastSocket import ChunkManager, FileTransfer
+from fastsocket import ChunkManager, FileTransfer
 import socket
 from typing import List, Tuple
 

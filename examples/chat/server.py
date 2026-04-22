@@ -12,8 +12,8 @@ Commands:
   /quit                  - Disconnect
 """
 
-from FastSocket import FastSocketServer, SocketConfig, Queue
-from FastSocket.utils.framing import send_framed
+from fastsocket import FastSocketServer, SocketConfig, Queue
+from fastsocket.utils.framing import send_framed
 import time
 from datetime import datetime, timedelta
 from threading import Lock

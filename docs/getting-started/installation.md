@@ -8,7 +8,7 @@
 ## Install from PyPI
 
 ```bash
-pip install FastSocket
+pip install fastsocket
 ```
 
 ## Install from source (development mode)
@@ -22,7 +22,7 @@ pip install -e .
 ## Quick verification
 
 ```bash
-python -c "from FastSocket import FastSocketServer, SocketConfig; print('OK')"
+python -c "from fastsocket import FastSocketServer, SocketConfig; print('OK')"
 ```
 
 If it prints `OK`, you're ready to go.

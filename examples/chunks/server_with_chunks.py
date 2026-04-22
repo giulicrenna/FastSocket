@@ -5,7 +5,7 @@ This example demonstrates automatic chunking for large data transfers.
 The server receives large data in chunks and reassembles it automatically.
 """
 
-from FastSocket import FastSocketServer, SocketConfig, Queue, ChunkManager
+from fastsocket import FastSocketServer, SocketConfig, Queue, ChunkManager
 import socket
 
 # Create chunk manager for handling large data

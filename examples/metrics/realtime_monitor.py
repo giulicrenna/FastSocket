@@ -9,7 +9,7 @@ import time
 import threading
 from collections import deque
 from datetime import datetime
-from FastSocket import FastSocketServer, SocketConfig, Queue
+from fastsocket import FastSocketServer, SocketConfig, Queue
 
 
 class MetricsCollector:

@@ -5,7 +5,7 @@ FastSocket includes UDP client and server support for low-latency, datagram-base
 ## UDP Server
 
 ```python
-from FastSocket import FastSocketUDPServer, SocketConfig, Queue
+from fastsocket import FastSocketUDPServer, SocketConfig, Queue
 import socket
 
 def handle_messages(messages: Queue):
@@ -23,7 +23,7 @@ server.start()
 ## UDP Client
 
 ```python
-from FastSocket import FastSocketUDPClient, SocketConfig
+from fastsocket import FastSocketUDPClient, SocketConfig
 import socket
 
 def on_response(msg: str, addr: tuple):

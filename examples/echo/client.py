@@ -1,4 +1,4 @@
-from FastSocket import SocketConfig, FastSocketClient
+from fastsocket import SocketConfig, FastSocketClient
 import os
 import time
 import random

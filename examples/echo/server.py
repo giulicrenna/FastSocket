@@ -1,4 +1,4 @@
-from FastSocket import FastSocketServer, SocketConfig, Queue
+from fastsocket import FastSocketServer, SocketConfig, Queue
 import os
 import random
 

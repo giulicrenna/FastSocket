@@ -10,12 +10,12 @@ import time
 from threading import Thread, Lock
 from typing import List, Callable
 
-from FastSocket.core.config import SocketConfig
-from FastSocket.core.client_handler import ClientType
-from FastSocket.utils.logger import Logger
-from FastSocket.utils.exceptions import InvalidMessageType
-from FastSocket.utils.framing import send_framed
-from FastSocket.utils.types import Types
+from fastsocket.core.config import SocketConfig
+from fastsocket.core.client_handler import ClientType
+from fastsocket.utils.logger import Logger
+from fastsocket.utils.exceptions import InvalidMessageType
+from fastsocket.utils.framing import send_framed
+from fastsocket.utils.types import Types
 
 
 class FastSocketServer(Thread):

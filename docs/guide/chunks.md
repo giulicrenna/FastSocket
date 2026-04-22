@@ -5,7 +5,7 @@
 ## Basic usage
 
 ```python
-from FastSocket import ChunkManager
+from fastsocket import ChunkManager
 
 manager = ChunkManager(chunk_size=4096, use_headers=True)
 data = b"A" * 50000

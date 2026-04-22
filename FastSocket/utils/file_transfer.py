@@ -11,9 +11,9 @@ import socket
 from typing import Callable, Optional, Tuple
 from pathlib import Path
 
-from FastSocket.utils.chunks import ChunkManager
-from FastSocket.utils.framing import send_framed, recv_framed
-from FastSocket.utils.logger import Logger
+from fastsocket.utils.chunks import ChunkManager
+from fastsocket.utils.framing import send_framed, recv_framed
+from fastsocket.utils.logger import Logger
 
 
 class FileTransfer:

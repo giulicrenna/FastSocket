@@ -11,11 +11,11 @@ import time
 from threading import Thread, Lock
 from typing import List, Callable
 
-from FastSocket.core.config import SocketConfig
-from FastSocket.core.tls_handler import TLSClientHandler
-from FastSocket.security.rsa_encryption import RSAEncryption
-from FastSocket.utils.logger import Logger
-from FastSocket.utils.exceptions import InvalidMessageType, NetworkException
+from fastsocket.core.config import SocketConfig
+from fastsocket.core.tls_handler import TLSClientHandler
+from fastsocket.security.rsa_encryption import RSAEncryption
+from fastsocket.utils.logger import Logger
+from fastsocket.utils.exceptions import InvalidMessageType, NetworkException
 
 
 class TLSSocketServer(Thread):

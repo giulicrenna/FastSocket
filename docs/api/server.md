@@ -1,9 +1,9 @@
 # Server
 
-::: FastSocket.server.tcp_server
+::: fastsocket.server.tcp_server
 
-::: FastSocket.server.udp_server
+::: fastsocket.server.udp_server
 
-::: FastSocket.server.secure_server
+::: fastsocket.server.secure_server
 
-::: FastSocket.server.tls_server
+::: fastsocket.server.tls_server

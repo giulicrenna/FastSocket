@@ -5,7 +5,7 @@ This example demonstrates ChunkManager functionality without networking.
 Shows chunking, reassembly, iteration, and estimation features.
 """
 
-from FastSocket import ChunkManager
+from fastsocket import ChunkManager
 
 def demo_basic_chunking():
     """Demonstrate basic chunking and reassembly."""

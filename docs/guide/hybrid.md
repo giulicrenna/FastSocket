@@ -11,7 +11,7 @@ This gives better throughput than pure RSA for continuous messaging, while authe
 ## Server
 
 ```python
-from FastSocket import TLSSocketServer, SocketConfig
+from fastsocket import TLSSocketServer, SocketConfig
 
 server = TLSSocketServer(
     SocketConfig(host="localhost", port=9555),
@@ -24,7 +24,7 @@ server.start()
 ## Client
 
 ```python
-from FastSocket import TLSSocketClient, SocketConfig
+from fastsocket import TLSSocketClient, SocketConfig
 
 def on_message(msg: str):
     print("Server:", msg)

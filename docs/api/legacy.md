@@ -1,5 +1,5 @@
 # FastSocket (legacy)
 
-Historical API in `FastSocket.fastsocket` kept for backward compatibility.
+Historical API in `fastsocket.fastsocket` kept for backward compatibility.
 
-::: FastSocket.fastsocket
+::: fastsocket.fastsocket

@@ -4,10 +4,10 @@ import socket
 import time
 import threading
 import pytest
-from FastSocket.core.config import SocketConfig
-from FastSocket.server.tcp_server import FastSocketServer
-from FastSocket.client.tcp_client import FastSocketClient
-from FastSocket.utils.framing import send_framed, recv_framed
+from fastsocket.core.config import SocketConfig
+from fastsocket.server.tcp_server import FastSocketServer
+from fastsocket.client.tcp_client import FastSocketClient
+from fastsocket.utils.framing import send_framed, recv_framed
 
 
 def free_port() -> int:
@@ -72,7 +72,7 @@ def test_send_msg_stream_rejects_invalid_type():
     port = free_port()
     server = start_server(port)
 
-    from FastSocket.utils.exceptions import InvalidMessageType
+    from fastsocket.utils.exceptions import InvalidMessageType
     with pytest.raises(InvalidMessageType):
         server.send_msg_stream(12345)
 

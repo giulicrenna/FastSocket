@@ -1,8 +1,8 @@
 """Client module for FastSocket."""
 
-from FastSocket.client.tcp_client import FastSocketClient
-from FastSocket.client.secure_client import SecureFastSocketClient
-from FastSocket.client.udp_client import FastSocketUDPClient
+from fastsocket.client.tcp_client import FastSocketClient
+from fastsocket.client.secure_client import SecureFastSocketClient
+from fastsocket.client.udp_client import FastSocketUDPClient
 
 __all__ = [
     'FastSocketClient',

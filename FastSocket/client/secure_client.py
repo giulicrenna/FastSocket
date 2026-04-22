@@ -12,11 +12,11 @@ from typing import List, Callable
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 
-from FastSocket.core.config import SocketConfig
-from FastSocket.security.rsa_encryption import RSAEncryption
-from FastSocket.utils.logger import Logger
-from FastSocket.utils.types import Types
-from FastSocket.utils.exceptions import BadEncryptionInput
+from fastsocket.core.config import SocketConfig
+from fastsocket.security.rsa_encryption import RSAEncryption
+from fastsocket.utils.logger import Logger
+from fastsocket.utils.types import Types
+from fastsocket.utils.exceptions import BadEncryptionInput
 
 
 class SecureFastSocketClient(Thread):

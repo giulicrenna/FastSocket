@@ -5,7 +5,7 @@ FastSocket provides secure variants (`SecureFastSocketServer` and `SecureFastSoc
 ## Secure Server
 
 ```python
-from FastSocket import SecureFastSocketServer, SocketConfig, Queue
+from fastsocket import SecureFastSocketServer, SocketConfig, Queue
 
 def handle_messages(messages: Queue):
     while not messages.empty():
@@ -21,7 +21,7 @@ server.start()
 ## Secure Client
 
 ```python
-from FastSocket import SecureFastSocketClient, SocketConfig
+from fastsocket import SecureFastSocketClient, SocketConfig
 
 def on_message(msg: str):
     print(msg)

@@ -41,7 +41,7 @@ FastSocket is a Python library designed for rapid development and production use
 ## Installation
 
 ```bash
-pip install FastSocket
+pip install fastsocket
 ```
 
 **Requirements:** Python 3.8+, [pycryptodome](https://pycryptodome.readthedocs.io/) (installed automatically).
@@ -59,7 +59,7 @@ pip install -e .
 ### TCP Server
 
 ```python
-from FastSocket import FastSocketServer, SocketConfig, Queue
+from fastsocket import FastSocketServer, SocketConfig, Queue
 
 def handle_messages(messages: Queue):
     while not messages.empty():
@@ -79,7 +79,7 @@ server.start()
 ### TCP Client
 
 ```python
-from FastSocket import FastSocketClient, SocketConfig
+from fastsocket import FastSocketClient, SocketConfig
 
 def on_message(msg: str):
     print("Server:", msg)
@@ -102,7 +102,7 @@ client.send_to_server("Hello FastSocket")
 ### Hybrid TLS Mode (RSA + AES-256-GCM + HMAC)
 
 ```python
-from FastSocket import TLSSocketServer, TLSSocketClient, SocketConfig
+from fastsocket import TLSSocketServer, TLSSocketClient, SocketConfig
 
 # Server
 server = TLSSocketServer(SocketConfig(host="localhost", port=9443), shared_secret="strong-secret")
@@ -123,7 +123,7 @@ client.start()
 ### UDP
 
 ```python
-from FastSocket import FastSocketUDPServer, SocketConfig
+from fastsocket import FastSocketUDPServer, SocketConfig
 import socket
 
 config = SocketConfig(host="0.0.0.0", port=9000, type=socket.SOCK_DGRAM)

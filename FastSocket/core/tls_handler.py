@@ -16,15 +16,15 @@ from threading import Thread
 from queue import Queue
 from typing import Tuple
 
-from FastSocket.security.rsa_encryption import RSAEncryption
-from FastSocket.security.tls_encryption import (
+from fastsocket.security.rsa_encryption import RSAEncryption
+from fastsocket.security.tls_encryption import (
     aes_encrypt, aes_decrypt,
     hmac_sign, hmac_verify,
     rsa_decrypt_key,
     RSA_BLOCK, HMAC_SIZE,
 )
-from FastSocket.utils.framing import send_framed, recv_framed
-from FastSocket.utils.logger import Logger
+from fastsocket.utils.framing import send_framed, recv_framed
+from fastsocket.utils.logger import Logger
 
 
 class TLSClientHandler(Thread):

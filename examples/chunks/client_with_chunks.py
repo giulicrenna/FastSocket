@@ -5,7 +5,7 @@ This example demonstrates receiving large data using ChunkManager.
 The client can request large data and receive it in chunks automatically.
 """
 
-from FastSocket import FastSocketClient, SocketConfig, ChunkManager
+from fastsocket import FastSocketClient, SocketConfig, ChunkManager
 import socket
 import time
 

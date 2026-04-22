@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 import time
 import statistics
 import socket
-from FastSocket import (
+from fastsocket import (
     FastSocketServer,
     FastSocketClient,
     FastSocketUDPServer,

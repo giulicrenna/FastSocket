@@ -19,8 +19,8 @@ FastSocket exposes specific exception classes for common failure scenarios.
 ## Recommended pattern
 
 ```python
-from FastSocket import FastSocketClient, SocketConfig
-from FastSocket import NetworkException, TimeoutException
+from fastsocket import FastSocketClient, SocketConfig
+from fastsocket import NetworkException, TimeoutException
 
 try:
     client = FastSocketClient(SocketConfig(host="localhost", port=8080))

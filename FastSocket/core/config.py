@@ -8,7 +8,7 @@ import socket
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from FastSocket.utils.types import Types
+    from fastsocket.utils.types import Types
 
 
 class SocketConfig:

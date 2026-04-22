@@ -1,8 +1,8 @@
 """Utilities module for FastSocket."""
 
-from FastSocket.utils.logger import Logger, Color
-from FastSocket.utils.types import Types
-from FastSocket.utils.exceptions import (
+from fastsocket.utils.logger import Logger, Color
+from fastsocket.utils.types import Types
+from fastsocket.utils.exceptions import (
     FastSocketException,
     InvalidMessageType,
     NetworkException,
@@ -13,8 +13,8 @@ from FastSocket.utils.exceptions import (
     ChunkException,
     TimeoutException,
 )
-from FastSocket.utils.chunks import ChunkManager
-from FastSocket.utils.file_transfer import FileTransfer
+from fastsocket.utils.chunks import ChunkManager
+from fastsocket.utils.file_transfer import FileTransfer
 
 __all__ = [
     'Logger',

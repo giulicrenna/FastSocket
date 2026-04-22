@@ -5,7 +5,7 @@
 ## Initialization
 
 ```python
-from FastSocket import FileTransfer
+from fastsocket import FileTransfer
 
 ft = FileTransfer(
     chunk_size=8192,

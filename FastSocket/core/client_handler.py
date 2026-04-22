@@ -12,10 +12,10 @@ from typing import Tuple
 
 from Crypto.PublicKey import RSA
 
-from FastSocket.utils.types import Types
-from FastSocket.utils.framing import recv_framed
-from FastSocket.security.rsa_encryption import RSAEncryption
-from FastSocket.utils.logger import Logger
+from fastsocket.utils.types import Types
+from fastsocket.utils.framing import recv_framed
+from fastsocket.security.rsa_encryption import RSAEncryption
+from fastsocket.utils.logger import Logger
 
 
 class ClientType(Thread):

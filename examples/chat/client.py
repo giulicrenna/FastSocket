@@ -9,7 +9,7 @@ Server commands (see /help):
   /name, /users, /metrics, /whisper (/w), /me, /ping, /help
 """
 
-from FastSocket import FastSocketClient, SocketConfig
+from fastsocket import FastSocketClient, SocketConfig
 import time
 from datetime import datetime
 

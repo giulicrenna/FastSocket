@@ -1,9 +1,9 @@
 # Core
 
-::: FastSocket.core.config
+::: fastsocket.core.config
 
-::: FastSocket.core.client_handler
+::: fastsocket.core.client_handler
 
-::: FastSocket.core.udp_handler
+::: fastsocket.core.udp_handler
 
-::: FastSocket.core.tls_handler
+::: fastsocket.core.tls_handler

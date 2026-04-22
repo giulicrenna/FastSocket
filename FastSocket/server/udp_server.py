@@ -10,10 +10,10 @@ from threading import Thread, Lock
 from typing import Dict, List, Callable, Tuple
 from time import time
 
-from FastSocket.core.config import SocketConfig
-from FastSocket.core.udp_handler import UDPClientHandler
-from FastSocket.utils.logger import Logger
-from FastSocket.utils.exceptions import InvalidMessageType
+from fastsocket.core.config import SocketConfig
+from fastsocket.core.udp_handler import UDPClientHandler
+from fastsocket.utils.logger import Logger
+from fastsocket.utils.exceptions import InvalidMessageType
 
 
 class FastSocketUDPServer(Thread):

@@ -5,7 +5,7 @@ FastSocket provides a straightforward API for running TCP servers and clients wi
 ## TCP Server
 
 ```python
-from FastSocket import FastSocketServer, SocketConfig, Queue
+from fastsocket import FastSocketServer, SocketConfig, Queue
 
 def handle_messages(messages: Queue):
     while not messages.empty():
@@ -22,7 +22,7 @@ server.start()
 ## TCP Client
 
 ```python
-from FastSocket import FastSocketClient, SocketConfig
+from fastsocket import FastSocketClient, SocketConfig
 
 def on_message(msg: str):
     print("Server:", msg)

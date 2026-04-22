@@ -1,13 +1,13 @@
 # Utils
 
-::: FastSocket.utils.chunks
+::: fastsocket.utils.chunks
 
-::: FastSocket.utils.file_transfer
+::: fastsocket.utils.file_transfer
 
-::: FastSocket.utils.framing
+::: fastsocket.utils.framing
 
-::: FastSocket.utils.exceptions
+::: fastsocket.utils.exceptions
 
-::: FastSocket.utils.logger
+::: fastsocket.utils.logger
 
-::: FastSocket.utils.types
+::: fastsocket.utils.types

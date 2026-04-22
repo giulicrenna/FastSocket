@@ -5,7 +5,7 @@ This example demonstrates UDP broadcast for service discovery
 or network announcements.
 """
 
-from FastSocket import FastSocketUDPClient, SocketConfig
+from fastsocket import FastSocketUDPClient, SocketConfig
 import socket
 import time
 

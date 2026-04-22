@@ -8,7 +8,7 @@ transmissions over socket connections.
 import socket
 import struct
 from typing import List, Iterator, Tuple
-from FastSocket.utils.logger import Logger
+from fastsocket.utils.logger import Logger
 
 
 class ChunkManager:

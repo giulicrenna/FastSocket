@@ -9,7 +9,7 @@ Local commands:
   /quit  /q      - Disconnect
 """
 
-from FastSocket import TLSSocketClient, SocketConfig
+from fastsocket import TLSSocketClient, SocketConfig
 import time
 from datetime import datetime
 

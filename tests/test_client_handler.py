@@ -3,8 +3,8 @@
 import socket
 import time
 import pytest
-from FastSocket.core.client_handler import ClientType
-from FastSocket.utils.framing import send_framed
+from fastsocket.core.client_handler import ClientType
+from fastsocket.utils.framing import send_framed
 
 
 def test_receives_message_into_queue():

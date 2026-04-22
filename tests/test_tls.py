@@ -4,10 +4,10 @@ import socket
 import time
 import threading
 import pytest
-from FastSocket.core.config import SocketConfig
-from FastSocket.server.tls_server import TLSSocketServer
-from FastSocket.client.tls_client import TLSSocketClient
-from FastSocket.security.tls_encryption import (
+from fastsocket.core.config import SocketConfig
+from fastsocket.server.tls_server import TLSSocketServer
+from fastsocket.client.tls_client import TLSSocketClient
+from fastsocket.security.tls_encryption import (
     aes_encrypt, aes_decrypt, hmac_sign, hmac_verify, generate_session_key,
 )
 

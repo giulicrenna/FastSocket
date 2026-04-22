@@ -17,7 +17,7 @@ Commands:
   /quit                  - Disconnect
 """
 
-from FastSocket import TLSSocketServer, SocketConfig, Queue
+from fastsocket import TLSSocketServer, SocketConfig, Queue
 import time
 from datetime import datetime, timedelta
 from threading import Lock

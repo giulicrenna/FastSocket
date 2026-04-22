@@ -5,7 +5,7 @@ This example demonstrates a file transfer server that can send files
 to clients with progress tracking and integrity verification.
 """
 
-from FastSocket import FastSocketServer, SocketConfig, Queue, FileTransfer
+from fastsocket import FastSocketServer, SocketConfig, Queue, FileTransfer
 import os
 from pathlib import Path
 

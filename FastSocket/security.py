@@ -5,7 +5,7 @@ from Crypto.Signature import PKCS1_v1_5
 
 import rsa
 
-from FastSocket.logger import Logger
+from fastsocket.logger import Logger
 
 class RSAEncryption:
     def __init__(self, pub_key_path: str = None,

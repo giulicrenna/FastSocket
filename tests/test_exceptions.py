@@ -1,7 +1,7 @@
 """Tests for custom exception classes."""
 
 import pytest
-from FastSocket.utils.exceptions import (
+from fastsocket.utils.exceptions import (
     InvalidMessageType,
     NetworkException,
     BadEncryptionInput,

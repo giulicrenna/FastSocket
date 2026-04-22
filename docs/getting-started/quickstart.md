@@ -3,7 +3,7 @@
 ## 1) Basic TCP Server
 
 ```python
-from FastSocket import FastSocketServer, SocketConfig, Queue
+from fastsocket import FastSocketServer, SocketConfig, Queue
 
 def on_messages(messages: Queue):
     while not messages.empty():
@@ -20,7 +20,7 @@ server.start()
 ## 2) Basic TCP Client
 
 ```python
-from FastSocket import FastSocketClient, SocketConfig
+from fastsocket import FastSocketClient, SocketConfig
 import time
 
 def on_message(msg: str):

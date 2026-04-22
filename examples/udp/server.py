@@ -5,7 +5,7 @@ This example demonstrates a simple UDP echo server that receives
 datagrams from multiple sources and echoes them back.
 """
 
-from FastSocket import FastSocketUDPServer, SocketConfig, Queue
+from fastsocket import FastSocketUDPServer, SocketConfig, Queue
 import socket
 
 def handle_messages(messages: Queue):

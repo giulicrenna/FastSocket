@@ -16,10 +16,10 @@ if __name__ == '__main__':
     from security import RSAEncryption
     from logger import Logger
 else:
-    from FastSocket._types import *
-    from FastSocket._expt import *
-    from FastSocket.security import RSAEncryption
-    from FastSocket.logger import Logger
+    from fastsocket._types import *
+    from fastsocket._expt import *
+    from fastsocket.security import RSAEncryption
+    from fastsocket.logger import Logger
 
 class SocketConfig:
     def __init__(self,

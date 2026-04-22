@@ -10,8 +10,8 @@ import time
 from threading import Thread
 from typing import List, Callable, Tuple
 
-from FastSocket.core.config import SocketConfig
-from FastSocket.utils.logger import Logger
+from fastsocket.core.config import SocketConfig
+from fastsocket.utils.logger import Logger
 
 
 class FastSocketUDPClient(Thread):

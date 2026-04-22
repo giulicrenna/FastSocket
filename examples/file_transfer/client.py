@@ -5,7 +5,7 @@ This example demonstrates a file transfer client that can request
 and receive files from a server with progress tracking.
 """
 
-from FastSocket import FastSocketClient, SocketConfig, FileTransfer
+from fastsocket import FastSocketClient, SocketConfig, FileTransfer
 import time
 from pathlib import Path
 

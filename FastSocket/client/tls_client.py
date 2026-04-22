@@ -13,15 +13,15 @@ from typing import List, Callable
 
 from Crypto.PublicKey import RSA
 
-from FastSocket.core.config import SocketConfig
-from FastSocket.security.rsa_encryption import RSAEncryption
-from FastSocket.security.tls_encryption import (
+from fastsocket.core.config import SocketConfig
+from fastsocket.security.rsa_encryption import RSAEncryption
+from fastsocket.security.tls_encryption import (
     generate_session_key, aes_encrypt, aes_decrypt,
     hmac_sign, hmac_verify, rsa_encrypt_key,
     HMAC_SIZE,
 )
-from FastSocket.utils.framing import send_framed, recv_framed
-from FastSocket.utils.logger import Logger
+from fastsocket.utils.framing import send_framed, recv_framed
+from fastsocket.utils.logger import Logger
 
 
 class TLSSocketClient(Thread):

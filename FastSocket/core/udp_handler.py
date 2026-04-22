@@ -10,7 +10,7 @@ from queue import Queue
 from typing import Tuple, Dict
 from time import time
 
-from FastSocket.utils.logger import Logger
+from fastsocket.utils.logger import Logger
 
 
 class UDPClientHandler:

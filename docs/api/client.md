@@ -1,9 +1,9 @@
 # Client
 
-::: FastSocket.client.tcp_client
+::: fastsocket.client.tcp_client
 
-::: FastSocket.client.udp_client
+::: fastsocket.client.udp_client
 
-::: FastSocket.client.secure_client
+::: fastsocket.client.secure_client
 
-::: FastSocket.client.tls_client
+::: fastsocket.client.tls_client

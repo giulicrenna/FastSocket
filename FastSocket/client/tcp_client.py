@@ -10,10 +10,10 @@ import time
 from threading import Thread
 from typing import List, Callable, Optional
 
-from FastSocket.core.config import SocketConfig
-from FastSocket.utils.framing import send_framed, recv_framed
-from FastSocket.utils.logger import Logger
-from FastSocket.utils.types import Types
+from fastsocket.core.config import SocketConfig
+from fastsocket.utils.framing import send_framed, recv_framed
+from fastsocket.utils.logger import Logger
+from fastsocket.utils.types import Types
 
 
 class FastSocketClient(Thread):

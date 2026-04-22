@@ -9,8 +9,8 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Hash import SHA256
 from Crypto.Signature import PKCS1_v1_5
 
-from FastSocket.utils.logger import Logger
-from FastSocket.utils.exceptions import BadEncryptionInput
+from fastsocket.utils.logger import Logger
+from fastsocket.utils.exceptions import BadEncryptionInput
 
 
 class RSAEncryption:

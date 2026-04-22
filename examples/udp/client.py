@@ -5,7 +5,7 @@ This example demonstrates a simple UDP client that sends datagrams
 to a server and receives responses.
 """
 
-from FastSocket import FastSocketUDPClient, SocketConfig
+from fastsocket import FastSocketUDPClient, SocketConfig
 import socket
 import time
 

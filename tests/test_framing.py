@@ -2,7 +2,7 @@
 
 import socket
 import pytest
-from FastSocket.utils.framing import send_framed, recv_framed
+from fastsocket.utils.framing import send_framed, recv_framed
 
 
 def socketpair():
