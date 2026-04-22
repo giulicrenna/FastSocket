@@ -6,6 +6,7 @@ with support for multiple concurrent client connections.
 """
 
 import socket
+import time
 from threading import Thread, Lock
 from typing import List, Callable
 
@@ -52,6 +53,7 @@ class FastSocketServer(Thread):
         self._client_buffer: List[ClientType] = []
         self._client_lock = Lock()
         self._new_message_handler: List[Callable] = []
+        self._running = True
 
     def run(self) -> None:
         Logger.print_log_normal(f'Running server on {self._config.host}:{self._config.port}', 'Server')
@@ -66,8 +68,16 @@ class FastSocketServer(Thread):
 
         task_wait_for_client.join()
 
+    def stop(self) -> None:
+        """Gracefully stop the server."""
+        self._running = False
+        try:
+            self.sock.close()
+        except Exception:
+            pass
+
     def _listen_for_new_clients(self) -> None:
-        while True:
+        while self._running:
             self.sock.settimeout(5)
             self.sock.listen()
 
@@ -105,12 +115,16 @@ class FastSocketServer(Thread):
         self._new_message_handler.append(func)
 
     def _run_new_message_handler(self, _func: Callable) -> None:
-        while True:
+        while self._running:
             with self._client_lock:
                 clients = list(self._client_buffer)
+            found = False
             for client in clients:
-                if client.connected:
+                if client.connected and not client.message_queue.empty():
                     _func(client.message_queue)
+                    found = True
+            if not found:
+                time.sleep(0.005)
 
     def send_msg_stream(self, message: str | bytes) -> None:
         """

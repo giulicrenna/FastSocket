@@ -7,6 +7,7 @@ before any application data flows.
 """
 
 import socket
+import time
 from threading import Thread
 from typing import List, Callable
 
@@ -30,11 +31,14 @@ class TLSSocketClient(Thread):
     Attributes:
         connected: True after a successful handshake
         _session_key: AES-256 session key shared with the server
+        _auto_reconnect: Reconnect automatically on connection loss
+        _reconnect_delay: Seconds to wait between reconnect attempts
 
     Example:
         >>> config = SocketConfig(host='localhost', port=9443)
         >>> client = TLSSocketClient(config, shared_secret="my-secret")
         >>> client.on_new_message(lambda msg: print(msg))
+        >>> client.on_disconnect(lambda: print("disconnected"))
         >>> client.start()
         >>> # wait for client.connected == True
         >>> client.send_to_server("Hello!")
@@ -42,7 +46,9 @@ class TLSSocketClient(Thread):
 
     def __init__(self,
                  config: SocketConfig,
-                 shared_secret: str) -> None:
+                 shared_secret: str,
+                 auto_reconnect: bool = False,
+                 reconnect_delay: float = 1.0) -> None:
         super().__init__()
         self.daemon = True
         self._config = config
@@ -52,8 +58,12 @@ class TLSSocketClient(Thread):
             else shared_secret
         )
         self._new_message_handler: List[Callable] = []
+        self._disconnect_handlers: List[Callable] = []
         self._session_key: bytes = None
         self.connected: bool = False
+        self._running = True
+        self._auto_reconnect = auto_reconnect
+        self._reconnect_delay = reconnect_delay
         self.sock: socket.socket = self._config._create_socket()
 
     # ── handshake ─────────────────────────────────────────────────────────────
@@ -62,7 +72,7 @@ class TLSSocketClient(Thread):
         try:
             # Step 1: receive server RSA public key
             pub_key_bytes = recv_framed(self.sock)
-            if not pub_key_bytes:
+            if pub_key_bytes is None:
                 return False
             server_pub_key = RSA.import_key(pub_key_bytes)
 
@@ -75,7 +85,7 @@ class TLSSocketClient(Thread):
 
             # Step 3: receive server's AES-encrypted OK + server auth token
             raw = recv_framed(self.sock)
-            if not raw:
+            if raw is None:
                 return False
 
             if raw == b"AUTH_FAIL":
@@ -113,6 +123,17 @@ class TLSSocketClient(Thread):
         for handler in self._new_message_handler:
             Thread(target=self._recv_loop, args=(handler,), daemon=True).start()
 
+    # ── stop ──────────────────────────────────────────────────────────────────
+
+    def stop(self) -> None:
+        """Close the connection and stop receive loops."""
+        self._running = False
+        self.connected = False
+        try:
+            self.sock.close()
+        except Exception:
+            pass
+
     # ── send / receive ────────────────────────────────────────────────────────
 
     def send_to_server(self, msg: str) -> None:
@@ -129,11 +150,23 @@ class TLSSocketClient(Thread):
         """Register a callback: func(plaintext_str) called on each message."""
         self._new_message_handler.append(func)
 
+    def on_disconnect(self, func: Callable) -> None:
+        """
+        Register a disconnect callback.
+
+        Called (with no arguments) when the connection is lost. If
+        auto_reconnect is enabled, fires before each reconnect attempt.
+
+        Args:
+            func: Callable with no arguments
+        """
+        self._disconnect_handlers.append(func)
+
     def _recv_loop(self, func: Callable) -> None:
         while True:
             try:
                 raw = recv_framed(self.sock)
-                if not raw:
+                if raw is None:
                     self.connected = False
                     break
                 plaintext = aes_decrypt(self._session_key, raw).decode('utf-8')
@@ -142,3 +175,33 @@ class TLSSocketClient(Thread):
                 Logger.print_log_error(e, 'TLSSocketClient')
                 self.connected = False
                 break
+        self._handle_disconnect(func)
+
+    def _handle_disconnect(self, func: Callable) -> None:
+        for handler in self._disconnect_handlers:
+            try:
+                handler()
+            except Exception as e:
+                Logger.print_log_error(e, 'TLSSocketClient disconnect handler')
+
+        if self._auto_reconnect and self._running:
+            self._reconnect(func)
+
+    def _reconnect(self, func: Callable) -> None:
+        while self._running:
+            time.sleep(self._reconnect_delay)
+            try:
+                self.sock = self._config._create_socket()
+                self.sock.connect((self._config.host, self._config.port))
+                self._session_key = None
+
+                if not self._handshake():
+                    self.sock.close()
+                    continue
+
+                self.connected = True
+                Logger.print_log_normal('Reconnected to TLS server', 'TLSSocketClient')
+                Thread(target=self._recv_loop, args=(func,), daemon=True).start()
+                return
+            except Exception as e:
+                Logger.print_log_error(f'Reconnect failed: {e}', 'TLSSocketClient')

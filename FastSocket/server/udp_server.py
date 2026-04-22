@@ -6,7 +6,7 @@ multiple concurrent datagram sources and optional broadcast.
 """
 
 import socket
-from threading import Thread
+from threading import Thread, Lock
 from typing import Dict, List, Callable, Tuple
 from time import time
 
@@ -60,12 +60,15 @@ class FastSocketUDPServer(Thread):
             enable_broadcast: Enable UDP broadcast support
         """
         super().__init__()
+        self.daemon = True
         self._config = config
         self._client_buffer: Dict[Tuple[str, int], UDPClientHandler] = {}
+        self._client_lock = Lock()
         self._new_message_handler: List[Callable] = []
         self._recv_size = recv_size
         self._timeout = client_timeout
         self._enable_broadcast = enable_broadcast
+        self._running = True
 
     def run(self) -> None:
         """
@@ -107,54 +110,49 @@ class FastSocketUDPServer(Thread):
         cleanup_thread.daemon = True
         cleanup_thread.start()
 
-        # Keep main thread alive
-        receiver_thread.join()
+        while self._running:
+            receiver_thread.join(timeout=1)
+
+    def stop(self) -> None:
+        """Gracefully stop the server."""
+        self._running = False
+        try:
+            self.sock.close()
+        except Exception:
+            pass
 
     def _receive_datagrams(self) -> None:
-        """
-        Receive datagrams from all sources.
-
-        Runs in a separate thread, receiving datagrams and routing
-        them to the appropriate client handler based on source address.
-        """
-        while True:
+        while self._running:
             try:
                 data, addr = self.sock.recvfrom(self._recv_size)
 
                 if data:
                     message = data.decode('utf-8')
 
-                    # Get or create handler for this source
-                    if addr not in self._client_buffer:
-                        handler = UDPClientHandler(addr)
-                        self._client_buffer[addr] = handler
-                        Logger.print_log_debug(f'New UDP source: {addr}')
+                    with self._client_lock:
+                        if addr not in self._client_buffer:
+                            self._client_buffer[addr] = UDPClientHandler(addr)
+                            Logger.print_log_debug(f'New UDP source: {addr}')
+                        self._client_buffer[addr].add_message(message)
 
-                    # Add message to handler's queue
-                    self._client_buffer[addr].add_message(message)
-
+            except OSError:
+                break
             except Exception as e:
                 Logger.print_log_error(f'Error receiving datagram: {e}', 'UDPServer')
 
     def _cleanup_inactive_clients(self) -> None:
-        """
-        Remove inactive client handlers.
-
-        Runs periodically to clean up handlers for sources that
-        haven't sent data within the timeout period.
-        """
         import time
-        while True:
-            time.sleep(10)  # Check every 10 seconds
+        while self._running:
+            time.sleep(10)
 
-            to_remove = []
-            for addr, handler in self._client_buffer.items():
-                if handler.is_timeout(self._timeout):
-                    to_remove.append(addr)
-
-            for addr in to_remove:
-                del self._client_buffer[addr]
-                Logger.print_log_debug(f'Removed inactive UDP source: {addr}')
+            with self._client_lock:
+                to_remove = [
+                    addr for addr, handler in self._client_buffer.items()
+                    if handler.is_timeout(self._timeout)
+                ]
+                for addr in to_remove:
+                    del self._client_buffer[addr]
+                    Logger.print_log_debug(f'Removed inactive UDP source: {addr}')
 
     def on_new_message(self, func: Callable) -> None:
         """
@@ -176,16 +174,17 @@ class FastSocketUDPServer(Thread):
         self._new_message_handler.append(func)
 
     def _run_new_message_handler(self, _func: Callable) -> None:
-        """
-        Execute a message handler in a loop.
-
-        Args:
-            _func: Message handler function
-        """
-        while True:
-            for handler in list(self._client_buffer.values()):
-                if handler.active:
+        import time
+        while self._running:
+            with self._client_lock:
+                handlers = list(self._client_buffer.values())
+            found = False
+            for handler in handlers:
+                if handler.active and not handler.message_queue.empty():
                     _func(handler.message_queue)
+                    found = True
+            if not found:
+                time.sleep(0.005)
 
     def send_to(self, address: Tuple[str, int], message: str | bytes) -> int:
         """
@@ -233,7 +232,9 @@ class FastSocketUDPServer(Thread):
             raise InvalidMessageType
 
         results = []
-        for addr in list(self._client_buffer.keys()):
+        with self._client_lock:
+            addrs = list(self._client_buffer.keys())
+        for addr in addrs:
             target_addr = (addr[0], port if port else addr[1])
             try:
                 bytes_sent = self.send_to(target_addr, message)
@@ -254,4 +255,5 @@ class FastSocketUDPServer(Thread):
             >>> sources = server.get_active_sources()
             >>> print(f"Active sources: {len(sources)}")
         """
-        return [addr for addr, handler in self._client_buffer.items() if handler.active]
+        with self._client_lock:
+            return [addr for addr, handler in self._client_buffer.items() if handler.active]

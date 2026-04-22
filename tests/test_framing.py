@@ -42,10 +42,10 @@ def test_empty_payload():
     a.close(); b.close()
 
 
-def test_closed_peer_returns_empty_bytes():
+def test_closed_peer_returns_none():
     a, b = socketpair()
     a.close()
-    assert recv_framed(b) == b""
+    assert recv_framed(b) is None
     b.close()
 
 

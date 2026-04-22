@@ -46,6 +46,7 @@ class SecureFastSocketServer(Thread):
         self._client_lock = Lock()
         self._new_message_handler: List[Callable] = []
         self._recv_size = _recv_size
+        self._running = True
 
         if pub_key_path is not None and priv_key_path is not None:
             Logger.print_log_debug('Loading RSA key pair.')
@@ -69,13 +70,20 @@ class SecureFastSocketServer(Thread):
         for _message_handler in self._new_message_handler:
             Thread(target=self._run_new_message_handler, args=(_message_handler,), daemon=True).start()
 
-        # Block this thread so the server stays alive
-        while True:
+        while self._running:
             time.sleep(1)
+
+    def stop(self) -> None:
+        """Gracefully stop the server."""
+        self._running = False
+        try:
+            self.sock.close()
+        except Exception:
+            pass
 
     def _send_server_pub_key(self) -> None:
         """Send server public key to each client once their key is received."""
-        while True:
+        while self._running:
             with self._client_lock:
                 clients = list(self._client_buffer)
             for client in clients:
@@ -88,7 +96,7 @@ class SecureFastSocketServer(Thread):
             time.sleep(0.05)
 
     def _listen_for_new_clients(self) -> None:
-        while True:
+        while self._running:
             self.sock.settimeout(5)
             self.sock.listen()
             try:
@@ -111,12 +119,16 @@ class SecureFastSocketServer(Thread):
         self._new_message_handler.append(func)
 
     def _run_new_message_handler(self, _func: Callable) -> None:
-        while True:
+        while self._running:
             with self._client_lock:
                 clients = list(self._client_buffer)
+            found = False
             for client in clients:
                 if client.connected and not client.message_queue.empty():
                     _func(client.message_queue)
+                    found = True
+            if not found:
+                time.sleep(0.005)
 
     def send_msg_stream(self, message: str | bytes) -> None:
         """Broadcast an encrypted message to all connected clients."""

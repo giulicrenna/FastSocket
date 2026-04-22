@@ -12,6 +12,7 @@ from typing import Callable, Optional, Tuple
 from pathlib import Path
 
 from FastSocket.utils.chunks import ChunkManager
+from FastSocket.utils.framing import send_framed, recv_framed
 from FastSocket.utils.logger import Logger
 
 
@@ -92,9 +93,9 @@ class FileTransfer:
             file_hash = self._compute_file_hash(file_path)
             Logger.print_log_debug(f'File hash ({self.hash_algorithm}): {file_hash}')
 
-        # Send metadata
-        metadata = f"{file_name}|{file_size}|{file_hash or 'NONE'}\n"
-        connection.sendall(metadata.encode('utf-8'))
+        # Send metadata using framing to avoid byte-by-byte reads on the receiver
+        metadata = f"{file_name}|{file_size}|{file_hash or 'NONE'}"
+        send_framed(connection, metadata.encode('utf-8'))
 
         # Send file content
         bytes_sent = 0
@@ -156,15 +157,11 @@ class FileTransfer:
             ...     print(f"\\rProgress: {pct:.1f}%", end='')
             >>> stats = transfer.receive_file(sock, 'downloads/', progress)
         """
-        # Receive metadata
-        metadata_line = b''
-        while not metadata_line.endswith(b'\n'):
-            chunk = connection.recv(1)
-            if not chunk:
-                raise ConnectionError("Connection closed during metadata transfer")
-            metadata_line += chunk
-
-        metadata = metadata_line.decode('utf-8').strip()
+        # Receive metadata via framing (single recv_framed call, no byte-by-byte loop)
+        metadata_bytes = recv_framed(connection)
+        if metadata_bytes is None:
+            raise ConnectionError("Connection closed during metadata transfer")
+        metadata = metadata_bytes.decode('utf-8')
         file_name, file_size_str, file_hash = metadata.split('|')
         file_size = int(file_size_str)
 

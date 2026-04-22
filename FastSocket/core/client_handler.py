@@ -46,8 +46,7 @@ class ClientType(Thread):
         while True:
             try:
                 data = recv_framed(self.connection)
-                if not data:
-                    # Empty bytes means peer closed the connection
+                if data is None:
                     self.connected = False
                     self.connection.close()
                     break

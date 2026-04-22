@@ -10,6 +10,7 @@ from Crypto.Hash import SHA256
 from Crypto.Signature import PKCS1_v1_5
 
 from FastSocket.utils.logger import Logger
+from FastSocket.utils.exceptions import BadEncryptionInput
 
 
 class RSAEncryption:
@@ -84,13 +85,23 @@ class RSAEncryption:
         Returns:
             bytes: Encrypted ciphertext
 
+        Raises:
+            BadEncryptionInput: If the message exceeds the RSA key's maximum plaintext size.
+
         Example:
             >>> rsa = RSAEncryption()
             >>> encrypted = rsa.encrypt("secret", other_pub_key)
         """
-        cipher = PKCS1_OAEP.new(recipient_pub_key)
         if isinstance(msg, str):
             msg = msg.encode('utf-8')
+        # OAEP/SHA-1 overhead is 42 bytes; key_size_bytes - 42 = max plaintext
+        max_size = recipient_pub_key.size_in_bytes() - 42
+        if len(msg) > max_size:
+            raise BadEncryptionInput(
+                f'Message too long for RSA-{recipient_pub_key.size_in_bits()}: '
+                f'max {max_size} bytes, got {len(msg)}'
+            )
+        cipher = PKCS1_OAEP.new(recipient_pub_key)
         return cipher.encrypt(msg)
 
     def decrypt(self, ciphertext: bytes) -> str:

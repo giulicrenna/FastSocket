@@ -16,6 +16,7 @@ from FastSocket.core.config import SocketConfig
 from FastSocket.security.rsa_encryption import RSAEncryption
 from FastSocket.utils.logger import Logger
 from FastSocket.utils.types import Types
+from FastSocket.utils.exceptions import BadEncryptionInput
 
 
 class SecureFastSocketClient(Thread):
@@ -62,10 +63,12 @@ class SecureFastSocketClient(Thread):
             If key paths are not provided, new RSA keys will be generated.
         """
         super().__init__()
+        self.daemon = True
         self._config = config
         self._new_message_handler: List[Callable] = []
         self._recv_size = _recv_size
         self.server_pub_key: RSA.RsaKey = None
+        self._running = True
 
         if pub_key_path is not None and priv_key_path is not None:
             Logger.print_log_debug('Loading RSA key pair.')
@@ -94,6 +97,14 @@ class SecureFastSocketClient(Thread):
             message_thread = Thread(target=self._run_new_message_handler, args=(_message_handler,))
             message_thread.start()
 
+    def stop(self) -> None:
+        """Close the connection and stop receive loops."""
+        self._running = False
+        try:
+            self.sock.close()
+        except Exception:
+            pass
+
     def send_to_server(self, msg: str) -> None:
         """
         Send an encrypted message to the server.
@@ -112,8 +123,15 @@ class SecureFastSocketClient(Thread):
         if self.server_pub_key is None:
             return
         try:
+            msg_bytes = msg.encode('utf-8')
+            max_size = self.server_pub_key.size_in_bytes() - 42
+            if len(msg_bytes) > max_size:
+                raise BadEncryptionInput(
+                    f'Message too long for RSA-{self.server_pub_key.size_in_bits()}: '
+                    f'max {max_size} bytes, got {len(msg_bytes)}'
+                )
             cipher = PKCS1_OAEP.new(self.server_pub_key)
-            message = cipher.encrypt(msg.encode('utf-8'))
+            message = cipher.encrypt(msg_bytes)
 
             self.sock.sendall(message)
         except Exception as e:

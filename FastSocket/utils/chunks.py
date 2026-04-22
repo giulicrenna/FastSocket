@@ -226,13 +226,13 @@ class ChunkManager:
         Returns:
             bytes: Received data (may be less than size if connection closes)
         """
-        data = b''
-        while len(data) < size:
-            packet = connection.recv(size - len(data))
+        buf = bytearray()
+        while len(buf) < size:
+            packet = connection.recv(size - len(buf))
             if not packet:
                 break
-            data += packet
-        return data
+            buf.extend(packet)
+        return bytes(buf)
 
     def iter_chunks(self, data: bytes | str) -> Iterator[bytes]:
         """

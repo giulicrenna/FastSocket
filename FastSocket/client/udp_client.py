@@ -6,6 +6,7 @@ sending and receiving datagrams, including broadcast capability.
 """
 
 import socket
+import time
 from threading import Thread
 from typing import List, Callable, Tuple
 
@@ -52,10 +53,12 @@ class FastSocketUDPClient(Thread):
             enable_broadcast: Enable UDP broadcast support
         """
         super().__init__()
+        self.daemon = True
         self._config = config
         self._new_message_handler: List[Callable] = []
         self._recv_size = recv_size
         self._enable_broadcast = enable_broadcast
+        self._running = True
 
         self.sock: socket.socket = self._config._create_socket()
 
@@ -79,11 +82,8 @@ class FastSocketUDPClient(Thread):
             message_thread.daemon = True
             message_thread.start()
 
-        # Keep main thread alive if there are handlers
         if self._new_message_handler:
-            self._new_message_handler[0].__self__  # Keep reference
-            while True:
-                import time
+            while self._running:
                 time.sleep(1)
 
     def send_to_server(self, msg: str | bytes,
@@ -208,10 +208,11 @@ class FastSocketUDPClient(Thread):
 
     def close(self) -> None:
         """
-        Close the UDP socket.
+        Close the UDP socket and stop receive loops.
 
         Example:
             >>> client.close()
         """
+        self._running = False
         self.sock.close()
         Logger.print_log_debug('UDP client socket closed')

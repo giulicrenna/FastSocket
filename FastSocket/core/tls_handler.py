@@ -99,7 +99,7 @@ class TLSClientHandler(Thread):
         while True:
             try:
                 raw = recv_framed(self.connection)
-                if not raw:
+                if raw is None:
                     self.connected = False
                     self.connection.close()
                     break
