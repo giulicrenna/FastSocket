@@ -18,7 +18,7 @@ Example:
     >>> client.start()
 """
 
-__version__ = '2.1.1'
+__version__ = '2.2.0'
 __author__ = 'Giuliano Crenna'
 __email__ = 'giulicrenna@gmail.com'
 
@@ -40,7 +40,7 @@ from fastsocket.client.tls_client import TLSSocketClient
 # Security exports
 from fastsocket.security.rsa_encryption import RSAEncryption
 from fastsocket.security.tls_encryption import (
-    generate_session_key, aes_encrypt, aes_decrypt,
+    derive_psk, generate_session_key, aes_encrypt, aes_decrypt,
     hmac_sign, hmac_verify,
 )
 
@@ -88,6 +88,7 @@ __all__ = [
 
     # Security
     'RSAEncryption',
+    'derive_psk',
     'generate_session_key',
     'aes_encrypt',
     'aes_decrypt',

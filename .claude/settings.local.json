@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(py|js|ts|txt|cfg|toml|yaml|yml|json|md\\)$\")",
+      "Bash(python -m pytest tests/ -v)",
+      "Bash(python -m pytest tests/ -v --tb=short)",
+      "Bash(rm -rf dist/ build/ *.egg-info fastsocket/*.egg-info)",
+      "Bash(python -m build)",
+      "Bash(pip install *)",
+      "Bash(rm -rf dist/ build/)",
+      "Bash(python -m pytest tests/ -v --timeout=60)",
+      "Bash(python -m pytest tests/test_tls.py::test_client_reconnects_after_server_drop -v)",
+      "Bash(python -m pytest tests/ -q)"
+    ]
+  }
+}

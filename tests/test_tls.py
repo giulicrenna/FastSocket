@@ -169,3 +169,104 @@ def test_multiple_messages_in_sequence():
 
     event.wait(timeout=3)
     assert received == ["one", "two", "three"]
+
+
+def test_psk_derivation_is_symmetric():
+    """Both sides derive the same key from the same raw secret."""
+    from fastsocket.security.tls_encryption import derive_psk
+    assert derive_psk(b"weak") == derive_psk(b"weak")
+    assert derive_psk(b"weak") != derive_psk(b"other")
+    assert len(derive_psk(b"any")) == 32
+
+
+def test_client_reconnects_after_server_drop():
+    """
+    Client with auto_reconnect=True must re-establish the session after
+    the server forcibly closes the connection and comes back up on the
+    same port.
+    """
+    port = free_port()
+    received_after = []
+    reconnected = threading.Event()
+    msg_event = threading.Event()
+
+    # First server: accepts one client then stops.
+    server1 = start_server(port)
+
+    config = SocketConfig(host="127.0.0.1", port=port)
+    client = TLSSocketClient(config, shared_secret=SECRET,
+                              auto_reconnect=True, reconnect_delay=0.5)
+    client.on_disconnect(reconnected.set)
+    # A handler is required to start recv_loops, which detect the disconnect.
+    client.on_new_message(lambda _: None)
+    client.start()
+
+    deadline = time.time() + 20
+    while not client.connected and time.time() < deadline:
+        time.sleep(0.1)
+    assert client.connected, "Initial handshake should succeed"
+
+    # Drop the connection from the server side.
+    server1.stop()
+    reconnected.wait(timeout=5)
+    assert not client.connected, "Client should detect disconnect"
+
+    # Bring up a second server on the same port.
+    def handler2(q):
+        while not q.empty():
+            msg, _ = q.get()
+            received_after.append(msg)
+            msg_event.set()
+
+    start_server(port, handler=handler2)
+
+    # Wait for the client to reconnect.
+    deadline = time.time() + 10
+    while not client.connected and time.time() < deadline:
+        time.sleep(0.2)
+    assert client.connected, "Client should reconnect to the new server"
+
+    client.send_to_server("after reconnect")
+    msg_event.wait(timeout=3)
+    assert "after reconnect" in received_after
+
+
+def test_multiple_concurrent_tls_clients():
+    """Several clients must connect, authenticate, and exchange independently."""
+    port = free_port()
+    received = []
+    lock = threading.Lock()
+    done = threading.Event()
+    N = 5
+
+    def handler(q):
+        while not q.empty():
+            msg, _ = q.get()
+            with lock:
+                received.append(msg)
+                if len(received) >= N:
+                    done.set()
+
+    start_server(port, handler=handler)
+
+    clients = []
+    for i in range(N):
+        cfg = SocketConfig(host="127.0.0.1", port=port)
+        c = TLSSocketClient(cfg, shared_secret=SECRET)
+        c.start()
+        clients.append((i, c))
+
+    # Wait for all to connect.
+    deadline = time.time() + 30
+    for _, c in clients:
+        while not c.connected and time.time() < deadline:
+            time.sleep(0.1)
+
+    for i, c in clients:
+        assert c.connected, f"Client {i} should be connected"
+        c.send_to_server(f"hello from client {i}")
+
+    done.wait(timeout=5)
+    assert len(received) == N
+    for i in range(N):
+        assert f"hello from client {i}" in received

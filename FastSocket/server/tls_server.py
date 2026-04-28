@@ -14,6 +14,7 @@ from typing import List, Callable
 from fastsocket.core.config import SocketConfig
 from fastsocket.core.tls_handler import TLSClientHandler
 from fastsocket.security.rsa_encryption import RSAEncryption
+from fastsocket.security.tls_encryption import derive_psk
 from fastsocket.utils.logger import Logger
 from fastsocket.utils.exceptions import InvalidMessageType, NetworkException
 
@@ -44,11 +45,13 @@ class TLSSocketServer(Thread):
         super().__init__()
         self.daemon = True
         self._config = config
-        self._shared_secret: bytes = (
+        raw: bytes = (
             shared_secret.encode('utf-8')
             if isinstance(shared_secret, str)
             else shared_secret
         )
+        # Derive once at startup; every TLSClientHandler receives the derived key.
+        self._shared_secret: bytes = derive_psk(raw)
         self._client_buffer: List[TLSClientHandler] = []
         self._client_lock = Lock()
         self._new_message_handler: List[Callable] = []
@@ -74,8 +77,14 @@ class TLSSocketServer(Thread):
             time.sleep(1)
 
     def stop(self) -> None:
-        """Gracefully stop the server."""
+        """Gracefully stop the server and close all active client connections."""
         self._running = False
+        with self._client_lock:
+            for client in self._client_buffer:
+                try:
+                    client.connection.close()
+                except Exception:
+                    pass
         try:
             self.sock.close()
         except Exception:
@@ -98,6 +107,9 @@ class TLSSocketServer(Thread):
                     self._client_buffer.append(handler)
             except socket.timeout:
                 pass
+            except OSError:
+                if not self._running:
+                    break
 
     def on_new_message(self, func: Callable) -> None:
         """Register a callback: func(queue) called when messages arrive."""

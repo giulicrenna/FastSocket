@@ -19,6 +19,21 @@ TAG_SIZE   = 16   # AES-GCM authentication tag
 HMAC_SIZE  = 32   # HMAC-SHA256 output
 RSA_BLOCK  = 512  # ciphertext size for RSA-4096
 
+# PBKDF2 parameters for PSK derivation
+_PSK_SALT       = b'fastsocket-psk-v2'
+_PSK_ITERATIONS = 50_000
+
+
+def derive_psk(raw_secret: bytes) -> bytes:
+    """
+    Derive a strong 32-byte key from a potentially weak PSK.
+
+    Uses PBKDF2-SHA256 so short or low-entropy passphrases are hardened
+    before they reach HMAC.  Both client and server must call this with
+    the same raw_secret; mismatched derivation = AUTH_FAIL.
+    """
+    return hashlib.pbkdf2_hmac('sha256', raw_secret, _PSK_SALT, _PSK_ITERATIONS)
+
 
 def generate_session_key() -> bytes:
     """Return 32 cryptographically random bytes (AES-256 key)."""

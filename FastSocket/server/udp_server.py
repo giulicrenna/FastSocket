@@ -64,6 +64,7 @@ class FastSocketUDPServer(Thread):
         self._config = config
         self._client_buffer: Dict[Tuple[str, int], UDPClientHandler] = {}
         self._client_lock = Lock()
+        self._socket_lock = Lock()   # guards concurrent sendto() calls
         self._new_message_handler: List[Callable] = []
         self._recv_size = recv_size
         self._timeout = client_timeout
@@ -209,7 +210,8 @@ class FastSocketUDPServer(Thread):
         if isinstance(message, str):
             message = message.encode('utf-8')
 
-        return self.sock.sendto(message, address)
+        with self._socket_lock:
+            return self.sock.sendto(message, address)
 
     def broadcast(self, message: str | bytes, port: int = None) -> List[int]:
         """

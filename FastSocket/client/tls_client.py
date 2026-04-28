@@ -8,7 +8,7 @@ before any application data flows.
 
 import socket
 import time
-from threading import Thread
+from threading import Thread, Lock
 from typing import List, Callable
 
 from Crypto.PublicKey import RSA
@@ -16,7 +16,7 @@ from Crypto.PublicKey import RSA
 from fastsocket.core.config import SocketConfig
 from fastsocket.security.rsa_encryption import RSAEncryption
 from fastsocket.security.tls_encryption import (
-    generate_session_key, aes_encrypt, aes_decrypt,
+    derive_psk, generate_session_key, aes_encrypt, aes_decrypt,
     hmac_sign, hmac_verify, rsa_encrypt_key,
     HMAC_SIZE,
 )
@@ -52,11 +52,13 @@ class TLSSocketClient(Thread):
         super().__init__()
         self.daemon = True
         self._config = config
-        self._shared_secret: bytes = (
+        raw = (
             shared_secret.encode('utf-8')
             if isinstance(shared_secret, str)
             else shared_secret
         )
+        # Derive a strong key from the PSK once; reused for every handshake.
+        self._shared_secret: bytes = derive_psk(raw)
         self._new_message_handler: List[Callable] = []
         self._disconnect_handlers: List[Callable] = []
         self._session_key: bytes = None
@@ -64,6 +66,8 @@ class TLSSocketClient(Thread):
         self._running = True
         self._auto_reconnect = auto_reconnect
         self._reconnect_delay = reconnect_delay
+        # Only one thread may run the reconnect sequence at a time.
+        self._reconnect_lock = Lock()
         self.sock: socket.socket = self._config._create_socket()
 
     # ── handshake ─────────────────────────────────────────────────────────────
@@ -119,7 +123,10 @@ class TLSSocketClient(Thread):
             return
 
         self.connected = True
+        self._start_recv_loops()
 
+    def _start_recv_loops(self) -> None:
+        """Launch one recv thread per registered handler."""
         for handler in self._new_message_handler:
             Thread(target=self._recv_loop, args=(handler,), daemon=True).start()
 
@@ -175,19 +182,28 @@ class TLSSocketClient(Thread):
                 Logger.print_log_error(e, 'TLSSocketClient')
                 self.connected = False
                 break
-        self._handle_disconnect(func)
+        self._handle_disconnect()
 
-    def _handle_disconnect(self, func: Callable) -> None:
-        for handler in self._disconnect_handlers:
-            try:
-                handler()
-            except Exception as e:
-                Logger.print_log_error(e, 'TLSSocketClient disconnect handler')
+    def _handle_disconnect(self) -> None:
+        # Use a non-blocking acquire so only the FIRST thread that detects
+        # the disconnect fires callbacks and handles reconnection.
+        # All other recv threads (one per handler) just exit cleanly.
+        if not self._reconnect_lock.acquire(blocking=False):
+            return
 
-        if self._auto_reconnect and self._running:
-            self._reconnect(func)
+        try:
+            for handler in self._disconnect_handlers:
+                try:
+                    handler()
+                except Exception as e:
+                    Logger.print_log_error(e, 'TLSSocketClient disconnect handler')
 
-    def _reconnect(self, func: Callable) -> None:
+            if self._auto_reconnect and self._running:
+                self._reconnect()
+        finally:
+            self._reconnect_lock.release()
+
+    def _reconnect(self) -> None:
         while self._running:
             time.sleep(self._reconnect_delay)
             try:
@@ -201,7 +217,8 @@ class TLSSocketClient(Thread):
 
                 self.connected = True
                 Logger.print_log_normal('Reconnected to TLS server', 'TLSSocketClient')
-                Thread(target=self._recv_loop, args=(func,), daemon=True).start()
+                # Restart recv loops for ALL registered handlers.
+                self._start_recv_loops()
                 return
             except Exception as e:
                 Logger.print_log_error(f'Reconnect failed: {e}', 'TLSSocketClient')

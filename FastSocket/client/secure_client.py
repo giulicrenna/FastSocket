@@ -16,7 +16,6 @@ from fastsocket.core.config import SocketConfig
 from fastsocket.security.rsa_encryption import RSAEncryption
 from fastsocket.utils.logger import Logger
 from fastsocket.utils.types import Types
-from fastsocket.utils.exceptions import BadEncryptionInput
 
 
 class SecureFastSocketClient(Thread):
@@ -123,20 +122,13 @@ class SecureFastSocketClient(Thread):
         if self.server_pub_key is None:
             return
         try:
-            msg_bytes = msg.encode('utf-8')
-            max_size = self.server_pub_key.size_in_bytes() - 42
-            if len(msg_bytes) > max_size:
-                raise BadEncryptionInput(
-                    f'Message too long for RSA-{self.server_pub_key.size_in_bits()}: '
-                    f'max {max_size} bytes, got {len(msg_bytes)}'
-                )
-            cipher = PKCS1_OAEP.new(self.server_pub_key)
-            message = cipher.encrypt(msg_bytes)
-
+            # RSAEncryption.encrypt() validates the payload size and raises
+            # BadEncryptionInput if it exceeds the key's OAEP limit.
+            message = self._security.encrypt(msg, self.server_pub_key)
             self.sock.sendall(message)
         except Exception as e:
-            Logger.print_log_error(e, 'FastSocketClient')
-            raise e
+            Logger.print_log_error(e, 'SecureFastSocketClient')
+            raise
 
     def on_new_message(self, func: Callable) -> None:
         """

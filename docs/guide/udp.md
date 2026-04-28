@@ -43,3 +43,4 @@ client.send_to_server("hello udp")
 - For critical messages, prefer TCP or implement manual ACKs.
 - Keep datagram size to ≤1400 bytes to avoid IP fragmentation.
 - Broadcast requires `enable_broadcast=True` on the server.
+- `send_to()` and `broadcast()` can be called safely from multiple threads — since 2.2.0, a `_socket_lock` serialises concurrent `sendto()` calls on the shared socket.

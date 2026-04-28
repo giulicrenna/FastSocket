@@ -5,7 +5,7 @@ with open("README.md", encoding="utf-8") as f:
 
 setup(
     name='fastsocket',
-    version='2.1.1',
+    version='2.2.0',
     packages=find_packages(),
     python_requires='>=3.8',
     install_requires=[

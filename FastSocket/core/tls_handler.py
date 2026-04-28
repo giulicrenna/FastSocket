@@ -50,6 +50,7 @@ class TLSClientHandler(Thread):
         self.message_queue: Queue = Queue()
         self.connected: bool = False
         self._server_security = server_security
+        # The server already derived the PSK via derive_psk(); use it as-is.
         self._shared_secret = shared_secret
         self._session_key: bytes = None
 

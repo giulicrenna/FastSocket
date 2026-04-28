@@ -1,5 +1,40 @@
 # Changelog
 
+## [2.2.0] — 2026-04-28
+
+### Breaking changes
+
+- **PSK derivation in Hybrid TLS** — the pre-shared key is now passed through PBKDF2-SHA256 (50 000 iterations, fixed application salt) before it is used in HMAC operations. Servers and clients must both run ≥ 2.2.0; a 2.1.x client will be rejected by a 2.2.0 server and vice-versa. The derivation happens once at construction time so handshake latency is unaffected.
+
+### Bug fixes
+
+- **TLS auto-reconnect with multiple handlers** — when more than one `on_new_message` callback was registered, all recv threads detected the disconnect simultaneously and raced to create a new socket, clobbering each other. A `_reconnect_lock` now ensures only one thread handles the reconnect; on success it restarts recv loops for **all** registered handlers.
+- **`TLSSocketServer.stop()` closes active connections** — previously `stop()` only closed the listening socket, leaving already-connected `TLSClientHandler` threads alive indefinitely. Now it also closes every active client socket before shutting down.
+- **`TLSSocketServer._listen_for_new_clients` exits cleanly on stop** — the `accept()` call raised an unhandled `OSError` when the socket was closed by `stop()`. The exception is now caught when `_running` is `False`.
+
+### Security
+
+- **PSK hardening** (`derive_psk`) — see breaking changes above. Weak or short PSKs (e.g. `"dev"`) are now stretched by PBKDF2 before use, reducing the impact of low-entropy secrets.
+
+### Improvements
+
+- **Thread-safe logger** — `fastsocket.utils.logger` now uses Python's stdlib `logging` module instead of bare `print()`. Concurrent log calls from multiple threads no longer interleave. New helpers: `Logger.set_level(level)` and `Logger.add_file_handler(path)`.
+- **UDP concurrent-send safety** — `FastSocketUDPServer.send_to()` now holds `_socket_lock` around every `sendto()` call, preventing concurrent broadcasts from racing on the same socket.
+- **RSA validation consolidated** — `SecureFastSocketClient.send_to_server()` delegates to `RSAEncryption.encrypt()` instead of duplicating the size-check inline. `BadEncryptionInput` is raised from a single, tested code path.
+
+### Housekeeping
+
+- Removed legacy files: `fastsocket/fastsocket.py`, `fastsocket/_expt.py`, `fastsocket/_types.py`, `fastsocket/logger.py`. None were imported by the package; they existed only as historical artefacts.
+- `derive_psk` is now a public export from both `fastsocket.security.tls_encryption` and the top-level `fastsocket` namespace.
+
+### Tests
+
+- `test_psk_derivation_is_symmetric` — verifies `derive_psk` is deterministic and collision-free.
+- `test_client_reconnects_after_server_drop` — end-to-end test: connect → server drops → client detects → reconnects → sends message.
+- `test_multiple_concurrent_tls_clients` — five clients connect, authenticate, and exchange messages simultaneously.
+
+---
+
 ## [2.1.1] — 2026-04-22
 
 - Renamed Python import from `FastSocket` to `fastsocket` (lowercase) to match the package directory.
